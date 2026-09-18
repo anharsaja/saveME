@@ -4,7 +4,6 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -44,6 +42,9 @@ import com.saveme.app.ui.components.NeoMenuDialog
 import com.saveme.app.ui.components.NeoMenuItem
 import com.saveme.app.ui.components.NeoTextField
 import com.saveme.app.ui.components.SectionLabel
+import com.saveme.app.ui.components.cardGridCells
+import com.saveme.app.ui.components.cardGridSpacing
+import com.saveme.app.ui.components.gridContentPadding
 import com.saveme.app.ui.theme.AppIcons
 import com.saveme.app.ui.theme.CaptionStyle
 import com.saveme.app.ui.theme.CardWhite
@@ -88,11 +89,12 @@ fun CollectionScreen(
     BackHandler(enabled = viewModel.selectionMode) { viewModel.exitSelection() }
 
     Box(Modifier.fillMaxSize()) {
+        val spacing = cardGridSpacing()
         LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
-            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 32.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+            columns = cardGridCells(),
+            contentPadding = gridContentPadding(),
+            horizontalArrangement = Arrangement.spacedBy(spacing),
+            verticalArrangement = Arrangement.spacedBy(spacing),
             modifier = Modifier.fillMaxSize(),
         ) {
             item(span = { GridItemSpan(maxLineSpan) }) {

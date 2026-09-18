@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Rupa satu warna untuk ikon bertema Android 13+: bentuk yang sama, tanpa
+     warna kuning dan biru, karena peluncur mewarnainya sendiri. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <group
+        android:rotation="-45"
+        android:pivotX="47.3"
+        android:pivotY="60.7">
+        <path
+            android:fillColor="#00000000"
+            android:strokeColor="#000000"
+            android:strokeWidth="6.6"
+            android:pathData="M39.8,51.2 L54.8,51.2 A9.5,9.5 0 0 1 54.8,70.2 L39.8,70.2 A9.5,9.5 0 0 1 39.8,51.2 Z" />
+    </group>
+
+    <group
+        android:rotation="-45"
+        android:pivotX="60.7"
+        android:pivotY="47.3">
+        <path
+            android:fillColor="#00000000"
+            android:strokeColor="#000000"
+            android:strokeWidth="6.6"
+            android:pathData="M53.2,37.8 L68.2,37.8 A9.5,9.5 0 0 1 68.2,56.8 L53.2,56.8 A9.5,9.5 0 0 1 53.2,37.8 Z" />
+    </group>
+</vector>

@@ -8,14 +8,16 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
@@ -26,6 +28,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
@@ -42,12 +45,21 @@ import com.saveme.app.ui.theme.Sunny
 import com.saveme.app.ui.theme.readableOn
 import com.saveme.app.ui.theme.softTint
 
-/** Kerangka bersama semua dialog: latar gelap, kartu putih bergaris tebal. */
+/**
+ * Kerangka bersama semua dialog: latar gelap, kartu bergaris tebal.
+ *
+ * Kotak pembungkusnya mengambil seluruh layar — bukan hanya selebar layar —
+ * supaya kartu di dalamnya punya batas tinggi yang jelas. Tanpa itu, isi yang
+ * lebih panjang dari layar cuma terpotong di bawah dan [scrollable] tidak
+ * pernah punya sisa untuk digulir. Lebarnya juga dibatasi, jadi di tablet
+ * dialognya tetap sebuah kartu, bukan pita selebar layar.
+ */
 @Composable
 fun NeoDialog(
     onDismissRequest: () -> Unit,
     modifier: Modifier = Modifier,
     dismissOnClickOutside: Boolean = true,
+    scrollable: Boolean = true,
     content: @Composable () -> Unit,
 ) {
     Dialog(
@@ -59,18 +71,29 @@ fun NeoDialog(
     ) {
         Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 26.dp),
+                .fillMaxSize()
+                .imePadding()
+                .padding(horizontal = screenGutter() + 4.dp, vertical = 24.dp),
             contentAlignment = Alignment.Center,
         ) {
             NeoSurface(
-                modifier = modifier.fillMaxWidth(),
-                radius = 20.dp,
-                borderWidth = 3.dp,
-                shadowOffset = 6.dp,
+                modifier = modifier
+                    .widthIn(max = 460.dp)
+                    .fillMaxWidth(),
+                radius = NeoRadius.Card,
+                borderWidth = 4.dp,
+                shadowOffset = 8.dp,
                 contentPadding = PaddingValues(20.dp),
             ) {
-                content()
+                Column(
+                    modifier = if (scrollable) {
+                        Modifier.verticalScroll(rememberScrollState())
+                    } else {
+                        Modifier
+                    },
+                ) {
+                    content()
+                }
             }
         }
     }
@@ -93,12 +116,28 @@ fun NeoAlertDialog(
     confirmColor: Color = Sunny,
 ) {
     NeoDialog(onDismissRequest = onDismiss) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-            Icon(icon, null, tint = iconTint, modifier = Modifier.size(40.dp))
-            Spacer(Modifier.height(12.dp))
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            // Ikonnya duduk di dalam kotak berwarna, bukan melayang sendirian:
+            // blok warna bergaris tebal adalah bahasa dasar tampilan ini.
+            Box(
+                Modifier
+                    .size(52.dp)
+                    .background(
+                        softTint(iconTint, CardWhite, 0.22f),
+                        RoundedCornerShape(NeoRadius.Control),
+                    )
+                    .border(NeoBorder, Ink, RoundedCornerShape(NeoRadius.Control)),
+                contentAlignment = Alignment.Center,
+            ) {
+                Icon(icon, null, tint = iconTint, modifier = Modifier.size(26.dp))
+            }
+            Spacer(Modifier.height(14.dp))
             Text(title, style = ScreenTitleStyle, color = Ink, textAlign = TextAlign.Center)
             if (message != null) {
-                Spacer(Modifier.height(6.dp))
+                Spacer(Modifier.height(8.dp))
                 Text(
                     message,
                     style = BodyStyle,
@@ -107,7 +146,10 @@ fun NeoAlertDialog(
                 )
             }
             Spacer(Modifier.height(20.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
                 if (cancelLabel != null) {
                     NeoButton(
                         label = cancelLabel,
@@ -165,32 +207,39 @@ fun NeoMenuDialog(
     items: List<NeoMenuItem>,
     onDismiss: () -> Unit,
 ) {
-    NeoDialog(onDismissRequest = onDismiss) {
+    // Daftarnya menggulir sendiri, jadi dialognya tidak ikut menggulir.
+    NeoDialog(onDismissRequest = onDismiss, scrollable = false) {
         Column {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(title, style = ScreenTitleStyle, color = Ink, modifier = Modifier.weight(1f))
+                Text(
+                    title,
+                    style = ScreenTitleStyle,
+                    color = Ink,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f).padding(end = 8.dp),
+                )
                 NeoIconButton(
                     icon = AppIcons.Close,
                     contentDescription = "Tutup",
                     onClick = onDismiss,
                     size = 38.dp,
                     iconSize = 17.dp,
-                    radius = 11.dp,
                 )
             }
             Spacer(Modifier.height(14.dp))
             Column(
                 modifier = Modifier
-                    .heightIn(max = 420.dp)
+                    .heightIn(max = dialogListMaxHeight())
                     .verticalScroll(rememberScrollState()),
                 verticalArrangement = Arrangement.spacedBy(9.dp),
             ) {
                 items.forEach { item ->
                     NeoSurface(
                         modifier = Modifier.fillMaxWidth(),
-                        radius = 12.dp,
+                        radius = NeoRadius.Control,
                         background = if (item.destructive) softTint(Danger) else CardWhite,
-                        shadowOffset = 3.dp,
+                        shadowOffset = 4.dp,
                         onClick = {
                             item.onClick()
                             onDismiss()
@@ -212,6 +261,8 @@ fun NeoMenuDialog(
                                 item.label,
                                 style = CardTitleStyle,
                                 color = if (item.destructive) Danger else Ink,
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis,
                             )
                         }
                     }
@@ -221,7 +272,10 @@ fun NeoMenuDialog(
     }
 }
 
-/** Titik warna yang bisa dipilih di editor koleksi. */
+/**
+ * Petak warna yang bisa dipilih di editor koleksi. Berbentuk kotak, bukan
+ * bulatan: di gaya ini warna hadir sebagai blok.
+ */
 @Composable
 fun ColorDot(
     color: Color,
@@ -229,16 +283,17 @@ fun ColorDot(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val shape = RoundedCornerShape(NeoRadius.Chip)
     Box(
         modifier = modifier
-            .size(38.dp)
-            .background(color, CircleShape)
-            .border(if (selected) 3.5.dp else 2.dp, Ink, CircleShape)
+            .size(40.dp)
+            .background(color, shape)
+            .border(if (selected) 4.dp else 2.dp, Ink, shape)
             .neoClickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
         if (selected) {
-            Icon(AppIcons.Check, null, tint = readableOn(color), modifier = Modifier.size(18.dp))
+            Icon(AppIcons.Check, null, tint = readableOn(color), modifier = Modifier.size(19.dp))
         }
     }
 }
@@ -251,14 +306,20 @@ fun IconChoice(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    val shape = RoundedCornerShape(NeoRadius.Control)
     Box(
         modifier = modifier
             .size(44.dp)
-            .background(if (selected) Sunny else PaperDim, RoundedCornerShape(12.dp))
-            .border(if (selected) 3.dp else 2.dp, Ink, RoundedCornerShape(12.dp))
+            .background(if (selected) Sunny else PaperDim, shape)
+            .border(if (selected) 4.dp else 2.dp, Ink, shape)
             .neoClickable(onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
-        Icon(icon, null, tint = readableOn(if (selected) Sunny else PaperDim), modifier = Modifier.size(21.dp))
+        Icon(
+            icon,
+            null,
+            tint = readableOn(if (selected) Sunny else PaperDim),
+            modifier = Modifier.size(21.dp),
+        )
     }
 }

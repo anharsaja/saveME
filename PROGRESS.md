@@ -44,6 +44,9 @@ Fitur yang sudah diuji langsung di emulator:
 | Migrasi database v1 → v2 | Jalan, data lama utuh |
 | Tema terang / gelap / ikut sistem | Jalan |
 | Animasi geser antar halaman (maju dan mundur) | Jalan |
+| Kembali lewat tombol/usapan sistem | Jalan, geser sama dengan tombol di aplikasi |
+| Modal New collection di layar pendek dan mendatar | Jalan, isinya menggulir sampai tombol Create |
+| Petak koleksi di layar lebar dan mendatar | Jalan, 2–5 kolom mengikuti lebar jendela |
 
 ---
 
@@ -112,11 +115,26 @@ Hapus keduanya hanya jika Room sudah tidak lagi memakai KSP.
 | activity-compose | 1.13.0 | 1.14.0 belum rilis stabil |
 | Coil | 3.6.2 | perlu `SingletonImageLoader.Factory` di `SaveMeApp` |
 
-`minSdk = 26` (Android 8.0) karena Nunito hanya tersedia sebagai variable font.
+`minSdk = 26` (Android 8.0) karena Archivo dipakai sebagai variable font — satu
+berkas untuk bobot 400 sampai 900, diminta lewat sumbu `wght`.
 
 Jangan tambahkan `androidx.sharetarget` — pustaka itu membawa service usang tanpa
 `android:exported` dan menggagalkan merge manifest. Direct Share sudah didukung
 sistem sejak Android 10 tanpa pustaka itu.
+
+### Gaya tampilan: neo-brutalism
+
+Tiga hal yang membentuk tampilannya, dan ketiganya sudah terkumpul di satu tempat
+masing-masing — jangan menuliskan angkanya lagi di layar:
+
+| Apa | Di mana | Isi |
+|---|---|---|
+| Sudut | `NeoRadius` di `components/Neo.kt` | `Chip` 3dp, `Control` 4dp, `Card` 6dp — nyaris siku |
+| Garis dan bayangan | `NeoBorder` 3dp, `NeoShadow` 6dp | hitam pekat, bayangan pejal tanpa blur |
+| Huruf | `ui/theme/Type.kt` | Archivo, bobot 700–900 untuk judul, jarak huruf dirapatkan |
+
+Tombol utama (`NeoButton`) menulis labelnya kapital semua lewat parameter
+`uppercase`, jadi label di pemanggil tetap ditulis biasa.
 
 ### Warna dan tema
 
@@ -144,11 +162,32 @@ Halaman `embed/captioned` **sudah tidak bisa dipakai** — kini berdinding login
 ### Lain-lain
 
 - Kartu link memakai `minLines = 2` pada judul supaya tinggi kartu bersebelahan sama.
-- `enableOnBackInvokedCallback="true"` diperlukan agar gesture back sistem ikut
-  memainkan animasi geser NavHost.
+- **Back sistem punya pasangan transisi sendiri.** `enterTransition` dan kawan-kawan
+  hanya dipakai untuk navigasi di dalam aplikasi; tombol atau usapan "kembali" milik
+  ponsel memakai `predictivePopEnterTransition` / `predictivePopExitTransition`, yang
+  bawaannya mengecil sambil memudar. Keduanya wajib diisi di `SaveMeNavHost`, kalau
+  tidak dua cara kembali akan terasa berbeda. Sejak targetSdk 36 bendera manifest
+  `enableOnBackInvokedCallback` tidak lagi bisa mematikan perilaku ini.
+- **Ukuran layar dibaca lewat `components/Layout.kt`**, bukan `LocalConfiguration`:
+  `windowWidth()`, `screenGutter()`, `cardGridCells()`, `dialogListMaxHeight()`.
+  Semuanya membaca `LocalWindowInfo.containerSize`, jadi tetap benar di jendela
+  terbagi dan layar lipat.
+- **`NeoDialog` membungkus isinya dengan `fillMaxSize()`,** bukan `fillMaxWidth()`.
+  Dengan `fillMaxWidth` kotaknya ikut setinggi isi, sehingga `verticalScroll` di
+  dalamnya tidak pernah punya sisa untuk digulir dan bagian bawah dialog — termasuk
+  tombol Create — terpotong di layar pendek. Dialog yang daftarnya sudah menggulir
+  sendiri memanggilnya dengan `scrollable = false`.
 - Layar detail menahan data terakhir (`lastKnown`) selama animasi keluar, kalau
   tidak isinya berkedip kosong saat ViewModel dibersihkan.
 - Semua tempo animasi terkumpul di `ui/theme/Motion.kt`.
+- **Animasi tekan ditahan, bukan dipercepat saja.** Satu ketukan cuma sekitar 80 md,
+  dan kalau ketukan itu memindahkan halaman, geseran halaman mulai di milidetik yang
+  sama — tombolnya bergerak tapi tidak pernah sempat terlihat. `rememberHeldPress`
+  di `components/Clickable.kt` menahan status tertekan selama `Motion.PressHoldMillis`
+  setelah jari terangkat. Turunnya memakai `Motion.PressIn*` (45 md), naiknya
+  `Motion.PressOut*` yang memantul sedikit. Pemakai `InteractionSource` mentah tidak
+  akan mendapat efek ini, jadi lewati `neoClickable` atau `NeoSurface` hanya bila ada
+  alasan kuat.
 
 ---
 
@@ -167,8 +206,9 @@ app/src/main/java/com/saveme/app/
 │  └─ backup/    Ekspor/impor JSON, termasuk pratinjau kustom (Base64)
 ├─ share/        CollectionShortcuts — pintasan Direct Share per koleksi
 ├─ ui/
-│  ├─ theme/     Palet dua tema, tipografi, Motion, ikon gambar tangan
-│  ├─ components/ Permukaan, tombol, kartu, dialog bergaya neo-brutalist
+│  ├─ theme/     Palet dua tema, tipografi Archivo, Motion, ikon gambar tangan
+│  ├─ components/ Permukaan, tombol, kartu, dialog bergaya neo-brutalist,
+│  │              Layout.kt (ukuran layar), Illustrations.kt (lambang mata rantai)
 │  ├─ home/ collection/ link/ search/ settings/ focus/   satu folder per layar
 │  └─ nav/       Rute dan NavHost
 ├─ work/         Pengingat harian (WorkManager)
@@ -241,3 +281,4 @@ Ringkasan apa saja yang sudah diminta dan dikerjakan, supaya tidak terulang.
 | 4 | Font tebal, animasi slide, hapus play, preview Instagram, dark mode | Kelimanya selesai |
 | 5 | Tombol back di detail, animasi keluar, animasi tekan, tempo lebih gesit | Keempatnya selesai |
 | 6 | Tinggi kartu di satu baris disamakan | `minLines = 2` pada judul kartu |
+| 7 | Logo jadi mata rantai, back sistem ikut menggeser, animasi tekan jangan kedahuluan, modal responsif, gaya Neo Brutalism | Kelimanya selesai |

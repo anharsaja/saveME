@@ -10,8 +10,10 @@ import androidx.compose.ui.graphics.luminance
 /**
  * Warna dasar aplikasi dalam dua rupa: terang dan gelap.
  *
- * Warna aksen (mint, coral, dan kawan-kawan) tidak ikut berganti karena sudah
- * cukup pekat untuk keduanya; yang bertukar hanyalah kertas, tinta, dan kartu.
+ * Nada neo-brutalism: tinta hitam pekat tanpa abu-abu kebiruan, kertas putih
+ * gading yang terang, dan warna blok yang tajam tanpa gradasi. Warna aksen
+ * (mint, coral, dan kawan-kawan) tidak ikut berganti karena sudah cukup pekat
+ * untuk keduanya; yang bertukar hanyalah kertas, tinta, dan kartu.
  */
 @Immutable
 data class SaveMePalette(
@@ -29,32 +31,33 @@ data class SaveMePalette(
 )
 
 val LightPalette = SaveMePalette(
-    paper = Color(0xFFF4F4F2),
-    paperDim = Color(0xFFE9E9E6),
+    // Kertas gading hangat, bukan abu-abu: kuning logo jadi lebih menyala di atasnya.
+    paper = Color(0xFFFFFBEF),
+    paperDim = Color(0xFFF0E7D2),
     card = Color(0xFFFFFFFF),
-    ink = Color(0xFF111111),
-    // Abu-abu sengaja dibuat lebih gelap dari kelabu biasa supaya teks kecil
-    // tetap terbaca oleh mata yang kurang tajam.
-    inkSoft = Color(0xFF474747),
-    inkFaint = Color(0xFF6E6E6C),
-    sunny = Color(0xFFF8C744),
-    sunnyDeep = Color(0xFFEFB933),
-    sunnySoft = Color(0xFFFDF2D9),
-    danger = Color(0xFFFF2D6F),
+    // Hitam murni. Seluruh garis tepi dan bayangan pejal memakai warna ini.
+    ink = Color(0xFF000000),
+    inkSoft = Color(0xFF3A3A3A),
+    inkFaint = Color(0xFF6B6B6B),
+    sunny = Color(0xFFFFD93D),
+    sunnyDeep = Color(0xFFF0C000),
+    sunnySoft = Color(0xFFFFF0B8),
+    danger = Color(0xFFFF4757),
     isDark = false,
 )
 
 val DarkPalette = SaveMePalette(
-    paper = Color(0xFF15151A),
-    paperDim = Color(0xFF2B2B33),
-    card = Color(0xFF1E1E25),
-    ink = Color(0xFFF3F3ED),
-    inkSoft = Color(0xFFC2C2BC),
-    inkFaint = Color(0xFF90908B),
-    sunny = Color(0xFFF8C744),
-    sunnyDeep = Color(0xFFEFB933),
-    sunnySoft = Color(0xFF3C3324),
-    danger = Color(0xFFFF4D82),
+    paper = Color(0xFF121212),
+    paperDim = Color(0xFF262626),
+    card = Color(0xFF1C1C1C),
+    // Di tema gelap giliran putih yang jadi garis tepi dan bayangan.
+    ink = Color(0xFFFFFFFF),
+    inkSoft = Color(0xFFCBCBCB),
+    inkFaint = Color(0xFF8F8F8F),
+    sunny = Color(0xFFFFD93D),
+    sunnyDeep = Color(0xFFF0C000),
+    sunnySoft = Color(0xFF3B3113),
+    danger = Color(0xFFFF6B6B),
     isDark = true,
 )
 
@@ -74,9 +77,9 @@ val SunnySoft: Color @Composable get() = LocalPalette.current.sunnySoft
 val Danger: Color @Composable get() = LocalPalette.current.danger
 
 /** Tinta gelap yang dipakai di atas bidang berwarna, sama di kedua tema. */
-val OnAccent = Color(0xFF111111)
+val OnAccent = Color(0xFF000000)
 
-private val LightInk = Color(0xFFF5F5F0)
+private val LightInk = Color(0xFFFFFFFF)
 
 /**
  * Warna teks atau ikon yang terbaca di atas [background].
@@ -87,16 +90,18 @@ private val LightInk = Color(0xFFF5F5F0)
 fun readableOn(background: Color): Color =
     if (background.luminance() > 0.28f) OnAccent else LightInk
 
-// Aksen tetap sama di tema terang maupun gelap.
-val Mint = Color(0xFF22C79A)
-val Coral = Color(0xFFFF6B6B)
-val Slate = Color(0xFF8698AF)
-val Rose = Color(0xFFFF8DA1)
-val Sky = Color(0xFF6AA6FF)
-val Grape = Color(0xFFB794F6)
-val Leafy = Color(0xFF86E3A8)
-val Sand = Color(0xFFE4C99B)
-val Teal = Color(0xFF4DC9CE)
+// Aksen tetap sama di tema terang maupun gelap. Semuanya warna blok yang pekat:
+// tidak ada pastel yang pudar, sesuai nada neo-brutalism.
+val Mint = Color(0xFF00D9A3)
+val Coral = Color(0xFFFF5C5C)
+val Slate = Color(0xFF7E93B0)
+val Rose = Color(0xFFFF7EB6)
+/** Biru langit yang sama dengan mata rantai di logo. */
+val Sky = Color(0xFF7FD4FF)
+val Grape = Color(0xFF9B6DFF)
+val Leafy = Color(0xFF7BE495)
+val Sand = Color(0xFFE8C07D)
+val Teal = Color(0xFF2FD4D4)
 
 /** Warna yang bisa dipilih untuk sampul koleksi. Disimpan sebagai key, bukan nilai mentah. */
 val AccentPalette: List<Pair<String, Color>> = listOf(
@@ -107,7 +112,7 @@ val AccentPalette: List<Pair<String, Color>> = listOf(
     "sky" to Sky,
     "grape" to Grape,
     "leafy" to Leafy,
-    "sunny" to Color(0xFFF8C744),
+    "sunny" to Color(0xFFFFD93D),
     "sand" to Sand,
     "teal" to Teal,
 )
@@ -120,9 +125,9 @@ fun accentColor(key: String?): Color = accentByKey[key] ?: Mint
 fun accentTab(key: String?): Color {
     val c = accentColor(key)
     return Color(
-        red = (c.red * 0.88f).coerceIn(0f, 1f),
-        green = (c.green * 0.88f).coerceIn(0f, 1f),
-        blue = (c.blue * 0.88f).coerceIn(0f, 1f),
+        red = (c.red * 0.85f).coerceIn(0f, 1f),
+        green = (c.green * 0.85f).coerceIn(0f, 1f),
+        blue = (c.blue * 0.85f).coerceIn(0f, 1f),
         alpha = 1f,
     )
 }
@@ -135,5 +140,5 @@ fun accentTab(key: String?): Color {
  * mencampur ke warna dasar, bukan menurunkan alpha.
  */
 @Composable
-fun softTint(color: Color, base: Color = CardWhite, strength: Float = 0.12f): Color =
+fun softTint(color: Color, base: Color = CardWhite, strength: Float = 0.16f): Color =
     lerp(base, color, strength)

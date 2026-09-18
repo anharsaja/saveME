@@ -3,7 +3,6 @@ package com.saveme.app.ui.home
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -12,7 +11,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material3.Icon
@@ -29,19 +27,22 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.saveme.app.data.db.CollectionEntity
+import com.saveme.app.ui.components.BrandMark
+import com.saveme.app.ui.components.CollectionCard
 import com.saveme.app.ui.components.CollectionEditorDialog
 import com.saveme.app.ui.components.CollectionPickerDialog
 import com.saveme.app.ui.components.EmptyState
-import com.saveme.app.ui.components.Mascot
 import com.saveme.app.ui.components.NeoAlertDialog
 import com.saveme.app.ui.components.NeoBanner
 import com.saveme.app.ui.components.NeoConfirmDialog
 import com.saveme.app.ui.components.NeoIconButton
 import com.saveme.app.ui.components.NeoMenuDialog
 import com.saveme.app.ui.components.NeoMenuItem
-import com.saveme.app.ui.components.neoClickable
 import com.saveme.app.ui.components.NeoTextField
-import com.saveme.app.ui.components.CollectionCard
+import com.saveme.app.ui.components.cardGridCells
+import com.saveme.app.ui.components.cardGridSpacing
+import com.saveme.app.ui.components.gridContentPadding
+import com.saveme.app.ui.components.neoClickable
 import com.saveme.app.ui.theme.AppIcons
 import com.saveme.app.ui.theme.DisplayStyle
 import com.saveme.app.ui.theme.Ink
@@ -71,11 +72,12 @@ fun HomeScreen(
 
 
     Box(Modifier.fillMaxSize()) {
+        val spacing = cardGridSpacing()
         LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
-            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 32.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+            columns = cardGridCells(),
+            contentPadding = gridContentPadding(),
+            horizontalArrangement = Arrangement.spacedBy(spacing),
+            verticalArrangement = Arrangement.spacedBy(spacing),
             modifier = Modifier.fillMaxSize(),
         ) {
             item(span = { androidx.compose.foundation.lazy.grid.GridItemSpan(maxLineSpan) }) {
@@ -101,7 +103,7 @@ fun HomeScreen(
                     }
 
                     Spacer(Modifier.height(22.dp))
-                    Text("Save now.\nFind anytime.", style = DisplayStyle, color = Ink)
+                    Text("SAVE ME\nBOOKMARK", style = DisplayStyle, color = Ink)
                     Spacer(Modifier.height(18.dp))
 
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -142,7 +144,7 @@ fun HomeScreen(
                     }
 
                     Spacer(Modifier.height(26.dp))
-                    Text("My Collections", style = SectionTitleStyle, color = Ink)
+                    Text("MY COLLECTIONS", style = SectionTitleStyle, color = Ink)
                     Spacer(Modifier.height(4.dp))
                 }
             }
@@ -154,7 +156,7 @@ fun HomeScreen(
                         message = "Collections keep your links sorted. Make the first one.",
                         actionLabel = "New collection",
                         onAction = { editorTarget = EditorTarget.New(null) },
-                        art = { Mascot(size = 108.dp) },
+                        art = { BrandMark(size = 108.dp) },
                     )
                 }
             } else {
