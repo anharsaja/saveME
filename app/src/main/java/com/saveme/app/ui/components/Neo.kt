@@ -3,7 +3,6 @@ package com.saveme.app.ui.components
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -21,7 +20,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -89,10 +87,9 @@ fun NeoSurface(
     content: @Composable BoxScope.() -> Unit,
 ) {
     val shape: Shape = RoundedCornerShape(radius)
-    val interaction = remember { MutableInteractionSource() }
-    val held by rememberHeldPress(interaction)
-    val down = held && onClick != null && enabled
-    val press by animateDpAsState(
+    val press = rememberNeoPress()
+    val down = press.pressed && onClick != null && enabled
+    val sink by animateDpAsState(
         targetValue = if (down) shadowOffset else 0.dp,
         // Turun cepat, naik memantul sedikit. Lihat catatan di Motion.
         animationSpec = if (down) Motion.PressInDp else Motion.PressOutDp,
@@ -104,9 +101,9 @@ fun NeoSurface(
     Box(
         modifier = modifier
             .padding(end = shadowOffset, bottom = shadowOffset)
-            .offset(x = press, y = press)
+            .offset(x = sink, y = sink)
             .drawBehind {
-                val gap = (shadowOffset - press).toPx()
+                val gap = (shadowOffset - sink).toPx()
                 if (gap > 0.5f) {
                     drawRoundRect(
                         color = shadowColor,
@@ -122,7 +119,7 @@ fun NeoSurface(
             .then(
                 if (onClick != null) {
                     Modifier.neoClickable(
-                        interaction = interaction,
+                        press = press,
                         enabled = enabled,
                         scaleOnPress = false,
                         onClick = onClick,

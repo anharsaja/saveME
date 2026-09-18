@@ -10,7 +10,11 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -21,8 +25,10 @@ import com.saveme.app.share.CollectionShortcuts
 import com.saveme.app.ui.components.CollectionPickerSheet
 import com.saveme.app.ui.components.neoClickable
 import com.saveme.app.ui.theme.Ink
+import com.saveme.app.ui.theme.Motion
 import com.saveme.app.ui.theme.SaveMeTheme
 import com.saveme.app.util.UrlUtil
+import kotlinx.coroutines.delay
 
 /**
  * Tujuan lembar berbagi Android. Layar ini tembus pandang dan hanya menampilkan
@@ -59,6 +65,18 @@ class ShareTargetActivity : ComponentActivity() {
                 val collections by app.repository.allCollections()
                     .collectAsStateWithLifecycle(initialValue = emptyList())
 
+                // Layar ini tidak punya geseran halaman yang bisa ditahan:
+                // begitu ditutup ia lenyap seketika, bersama animasi tekan
+                // koleksi yang baru saja diketuk. Jadi penutupannya sendiri
+                // yang diberi jeda, sepanjang jeda geseran di dalam aplikasi.
+                var closing by remember { mutableStateOf(false) }
+                LaunchedEffect(closing) {
+                    if (closing) {
+                        delay(Motion.ScreenDelayMillis.toLong())
+                        finish()
+                    }
+                }
+
                 // Peredup digambar sendiri, bukan lewat jendela dialog, supaya
                 // aplikasi asal di belakang terlihat redup dan pemilihnya
                 // terasa menempel di layar ini.
@@ -66,7 +84,9 @@ class ShareTargetActivity : ComponentActivity() {
                     modifier = Modifier
                         .fillMaxSize()
                         .background(Ink.copy(alpha = 0.55f))
-                        .neoClickable { finish() },
+                        // Tanpa gerakan tekan: peredam selebar layar yang ikut
+                        // mengecil akan menyingkapkan tepi terang di sekelilingnya.
+                        .neoClickable(scaleOnPress = false) { closing = true },
                     contentAlignment = Alignment.Center,
                 ) {
                     CollectionPickerSheet(
@@ -74,12 +94,17 @@ class ShareTargetActivity : ComponentActivity() {
                         collections = collections,
                         modifier = Modifier
                             .padding(horizontal = 24.dp)
-                            .neoClickable { /* menelan ketukan agar tidak menutup */ },
-                        onDismiss = { finish() },
+                            .neoClickable(scaleOnPress = false) { /* menelan ketukan */ },
+                        onDismiss = { closing = true },
                         onPick = { id ->
-                            val name = collections.firstOrNull { it.id == id }?.name.orEmpty()
-                            app.repository.saveLinkDetached(url, id) { result ->
-                                toast(describe(result, name))
+                            // Selama jeda tadi pemilihnya masih terlihat dan
+                            // masih menerima ketukan. Penjaga ini memastikan
+                            // satu kali berbagi tetap menyimpan satu tautan.
+                            if (!closing) {
+                                val name = collections.firstOrNull { it.id == id }?.name.orEmpty()
+                                app.repository.saveLinkDetached(url, id) { result ->
+                                    toast(describe(result, name))
+                                }
                             }
                         },
                     )

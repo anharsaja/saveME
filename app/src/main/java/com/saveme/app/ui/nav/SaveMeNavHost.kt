@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -61,24 +62,48 @@ fun SaveMeNavHost(
             startDestination = Routes.HOME,
             // Halaman bergeser penuh selebar layar, seperti membalik halaman
             // komik: yang baru masuk dari kanan, yang lama keluar ke kiri.
-            enterTransition = { slideInHorizontally(Motion.ScreenSlide) { it } },
-            exitTransition = { slideOutHorizontally(Motion.ScreenSlide) { -it } },
-            popEnterTransition = { slideInHorizontally(Motion.ScreenSlide) { -it } },
-            popExitTransition = { slideOutHorizontally(Motion.ScreenSlide) { it } },
+            //
+            // Keempat transisi berikut selalu dipicu tombol di dalam aplikasi,
+            // jadi semuanya memakai Motion.ScreenSlide yang menahan geseran
+            // selama Motion.ScreenDelayMillis. Perpindahannya sendiri sudah
+            // terjadi saat diketuk; yang ditunggu hanya gerakannya, supaya
+            // tombol pemanggilnya sempat terlihat memantul naik lebih dulu.
+            //
+            // Settings satu-satunya perkecualian arah, lihat isSettings() di
+            // bawah berkas ini.
+            enterTransition = {
+                val fromLeft = targetState.isSettings()
+                slideInHorizontally(Motion.ScreenSlide) { full -> if (fromLeft) -full else full }
+            },
+            exitTransition = {
+                val toRight = targetState.isSettings()
+                slideOutHorizontally(Motion.ScreenSlide) { full -> if (toRight) full else -full }
+            },
+            popEnterTransition = {
+                val fromRight = initialState.isSettings()
+                slideInHorizontally(Motion.ScreenSlide) { full -> if (fromRight) full else -full }
+            },
+            popExitTransition = {
+                val toLeft = initialState.isSettings()
+                slideOutHorizontally(Motion.ScreenSlide) { full -> if (toLeft) -full else full }
+            },
             // Tombol atau usapan "kembali" milik sistem tidak memakai transisi
             // pop di atas: Navigation punya pasangan sendiri untuk itu, dan
             // bawaannya adalah mengecil sambil memudar. Tanpa dua baris berikut,
             // kembali lewat tombol ponsel terasa berbeda dari tombol di aplikasi.
             //
             // Gerakannya mengikuti tepi yang diusap, jadi halaman selalu
-            // menyingkir searah dengan jari.
+            // menyingkir searah dengan jari — dan tanpa jeda, karena di sini
+            // tidak ada tombol yang sedang memantul untuk mengisi jeda itu.
+            // Usapan sistem pun menuntun geserannya sendiri; menahannya di
+            // awal hanya akan membuat halaman tertinggal dari jari.
             predictivePopEnterTransition = { edge ->
-                slideInHorizontally(Motion.ScreenSlide) { full ->
+                slideInHorizontally(Motion.ScreenSlideGesture) { full ->
                     if (edge == BackEventCompat.EDGE_RIGHT) full else -full
                 }
             },
             predictivePopExitTransition = { edge ->
-                slideOutHorizontally(Motion.ScreenSlide) { full ->
+                slideOutHorizontally(Motion.ScreenSlideGesture) { full ->
                     if (edge == BackEventCompat.EDGE_RIGHT) -full else full
                 }
             },
@@ -140,3 +165,15 @@ fun SaveMeNavHost(
         }
     }
 }
+
+/**
+ * Halaman baru umumnya datang dari kanan, seperti membalik ke halaman
+ * berikutnya. Settings satu-satunya yang datang dari kiri: tombolnya duduk di
+ * ujung kiri bilah atas Home, jadi halamannya terasa keluar dari tombol yang
+ * baru diketuk, bukan menyeberang dari sisi yang berlawanan. Sewaktu ditutup
+ * ia kembali ke kiri, ke tempat tombolnya semula.
+ *
+ * Kembali lewat usapan sistem tetap mengikuti tepi yang diusap, bukan aturan
+ * ini — gerakan itu milik jari, bukan milik halamannya.
+ */
+private fun NavBackStackEntry.isSettings() = destination.route == Routes.SETTINGS
