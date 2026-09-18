@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Membuat tiap koleksi muncul langsung sebagai tujuan di lembar berbagi
+     Android, jadi tautan bisa disimpan tanpa membuka aplikasinya dulu. -->
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <share-target android:targetClass="com.saveme.app.ShareTargetActivity">
+        <data android:mimeType="text/plain" />
+        <data android:mimeType="text/*" />
+        <category android:name="com.saveme.app.category.SAVE_LINK" />
+    </share-target>
+</shortcuts>
