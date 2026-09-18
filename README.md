@@ -31,7 +31,12 @@ tersimpan di perangkat, tanpa akun, tanpa server, dan tanpa fitur berbayar.
 - **Urutkan** isi koleksi: terbaru, terlama, atau judul A-Z. Tautan yang dipin selalu di atas.
 - **Focus Mode** — satu tautan sekali tampil untuk membereskan tumpukan bacaan.
 - **Pengingat harian** untuk tautan yang belum dibaca, jamnya bisa diatur.
+- **Tampilan neo-brutalism** — garis hitam tebal, bayangan pejal tanpa blur, sudut
+  nyaris siku, warna blok yang pekat, dan huruf Archivo yang berat. Lambangnya dua
+  mata rantai saling mengait, dipakai mulai dari ikon peluncur sampai layar kosong.
 - **Tema terang atau gelap**, atau ikut pengaturan ponsel. Diatur di Settings ▸ Appearance.
+- **Menyesuaikan layar** — petak koleksi berisi dua sampai lima kolom mengikuti lebar
+  jendela, dan setiap dialog tetap utuh di layar pendek maupun saat papan ketik muncul.
 - **Cadangkan & pulihkan** ke satu berkas JSON lewat pemilih berkas bawaan Android.
   Pratinjau bawaan diunduh ulang dari alamatnya saat dipulihkan, sedangkan gambar
   pilihan Anda sendiri ikut dibawa di dalam berkas cadangan supaya tidak hilang.
@@ -51,7 +56,7 @@ Berkas APK yang dihasilkan ada di `app/build/outputs/apk/debug/app-debug.apk`.
 
 ## Kebutuhan
 
-- Android 8.0 (API 26) ke atas — dibutuhkan oleh variable font yang dipakai.
+- Android 8.0 (API 26) ke atas — dibutuhkan oleh variable font Archivo yang dipakai.
 - JDK 17 ke atas, Android SDK 37.
 - Izin `INTERNET` hanya dipakai untuk mengambil pratinjau tautan, dan
   `POST_NOTIFICATIONS` hanya untuk pengingat harian. Keduanya bisa diabaikan:

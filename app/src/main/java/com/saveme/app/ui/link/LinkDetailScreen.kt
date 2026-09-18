@@ -21,7 +21,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
@@ -56,9 +55,13 @@ import com.saveme.app.ui.components.NeoDivider
 import com.saveme.app.ui.components.NeoIconButton
 import com.saveme.app.ui.components.NeoMenuDialog
 import com.saveme.app.ui.components.NeoMenuItem
+import com.saveme.app.ui.components.NeoRadius
 import com.saveme.app.ui.components.NeoSurface
 import com.saveme.app.ui.components.NeoTextField
 import com.saveme.app.ui.components.SectionLabel
+import com.saveme.app.ui.components.readableColumn
+import com.saveme.app.ui.components.screenGutter
+import com.saveme.app.ui.components.windowWidth
 import com.saveme.app.ui.theme.AppIcons
 import com.saveme.app.ui.theme.BodyStyle
 import com.saveme.app.ui.theme.CaptionStyle
@@ -130,15 +133,17 @@ fun LinkDetailScreen(
     Box(Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
+                .align(Alignment.TopCenter)
+                .readableColumn()
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp, vertical = 12.dp),
+                .padding(horizontal = screenGutter(), vertical = 12.dp),
         ) {
             NeoSurface(
                 modifier = Modifier.fillMaxWidth(),
-                radius = 18.dp,
-                borderWidth = 3.dp,
-                shadowOffset = 5.dp,
+                radius = NeoRadius.Card,
+                borderWidth = 4.dp,
+                shadowOffset = 8.dp,
             ) {
                 Column(Modifier.fillMaxWidth()) {
                     HeaderRow(
@@ -149,13 +154,13 @@ fun LinkDetailScreen(
                         onMove = { showMovePicker = true },
                         onDelete = { showDelete = true },
                     )
-                    NeoDivider(thickness = 3.dp)
+                    NeoDivider()
                     MediaBlock(
                         item = current,
                         onOpen = { openUrl(context, link.url) },
                         onEditPreview = { showPreviewMenu = true },
                     )
-                    NeoDivider(thickness = 3.dp)
+                    NeoDivider()
 
                     Column(Modifier.padding(16.dp)) {
                         Row(verticalAlignment = Alignment.Top) {
@@ -169,7 +174,7 @@ fun LinkDetailScreen(
                                 Box(
                                     Modifier
                                         .fillMaxWidth()
-                                        .height(3.dp)
+                                        .height(4.dp)
                                         .background(Ink),
                                 )
                             }
@@ -180,7 +185,7 @@ fun LinkDetailScreen(
                                 onClick = { showEdit = true },
                                 size = 42.dp,
                                 iconSize = 19.dp,
-                                radius = 12.dp,
+                                radius = NeoRadius.Control,
                             )
                         }
 
@@ -221,7 +226,7 @@ fun LinkDetailScreen(
                         NeoSurface(
                             modifier = Modifier.fillMaxWidth(),
                             background = Sunny,
-                            radius = 12.dp,
+                            radius = NeoRadius.Control,
                             onClick = { openUrl(context, link.url) },
                             contentPadding = PaddingValues(horizontal = 13.dp, vertical = 13.dp),
                         ) {
@@ -391,38 +396,66 @@ private fun HeaderRow(
     onMove: () -> Unit,
     onDelete: () -> Unit,
 ) {
-    Row(
+    // Empat tombol tindakan plus nama situs tidak muat dalam satu baris di
+    // ponsel sempit — namanya akan tinggal dua huruf. Di lebar itu tombolnya
+    // turun ke baris sendiri, rata kanan.
+    val stacked = windowWidth() < 400.dp
+
+    Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 9.dp, end = 9.dp, top = 9.dp, bottom = 9.dp),
-        verticalAlignment = Alignment.CenterVertically,
+            .padding(9.dp),
     ) {
-        NeoIconButton(AppIcons.ArrowLeft, "Back", onBack, size = 36.dp, iconSize = 17.dp, radius = 11.dp)
-        Spacer(Modifier.width(9.dp))
-        Text(
-            siteName.uppercase(),
-            style = OverlineStyle,
-            color = Ink,
-            modifier = Modifier.weight(1f),
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-        )
-        NeoIconButton(AppIcons.Refresh, "Refresh preview", onRefresh, size = 36.dp, iconSize = 17.dp, radius = 11.dp)
-        Spacer(Modifier.width(4.dp))
-        NeoIconButton(AppIcons.Share, "Share", onShare, size = 36.dp, iconSize = 17.dp, radius = 11.dp)
-        Spacer(Modifier.width(4.dp))
-        NeoIconButton(AppIcons.Move, "Move", onMove, size = 36.dp, iconSize = 17.dp, radius = 11.dp)
-        Spacer(Modifier.width(4.dp))
-        NeoIconButton(
-            AppIcons.Trash,
-            "Delete",
-            onDelete,
-            size = 36.dp,
-            iconSize = 17.dp,
-            radius = 11.dp,
-            background = Danger,
-        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            NeoIconButton(AppIcons.ArrowLeft, "Back", onBack, size = 36.dp, iconSize = 17.dp)
+            Spacer(Modifier.width(9.dp))
+            Text(
+                siteName.uppercase(),
+                style = OverlineStyle,
+                color = Ink,
+                modifier = Modifier.weight(1f),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+            if (!stacked) {
+                HeaderActions(onRefresh, onShare, onMove, onDelete)
+            }
+        }
+        if (stacked) {
+            Spacer(Modifier.height(9.dp))
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                HeaderActions(onRefresh, onShare, onMove, onDelete)
+            }
+        }
     }
+}
+
+/** Empat tombol tindakan di kepala kartu detail. */
+@Composable
+private fun HeaderActions(
+    onRefresh: () -> Unit,
+    onShare: () -> Unit,
+    onMove: () -> Unit,
+    onDelete: () -> Unit,
+) {
+    NeoIconButton(AppIcons.Refresh, "Refresh preview", onRefresh, size = 36.dp, iconSize = 17.dp)
+    Spacer(Modifier.width(4.dp))
+    NeoIconButton(AppIcons.Share, "Share", onShare, size = 36.dp, iconSize = 17.dp)
+    Spacer(Modifier.width(4.dp))
+    NeoIconButton(AppIcons.Move, "Move", onMove, size = 36.dp, iconSize = 17.dp)
+    Spacer(Modifier.width(4.dp))
+    NeoIconButton(
+        AppIcons.Trash,
+        "Delete",
+        onDelete,
+        size = 36.dp,
+        iconSize = 17.dp,
+        background = Danger,
+    )
 }
 
 @Composable
@@ -497,7 +530,7 @@ private fun NotesField(linkId: Long, initial: String, onSave: (String) -> Unit) 
         background = SunnySoft,
         singleLine = false,
         minHeight = 104.dp,
-        radius = 12.dp,
+        radius = NeoRadius.Control,
         shadow = false,
     )
 }

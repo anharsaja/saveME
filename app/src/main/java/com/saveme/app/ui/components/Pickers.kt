@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -44,7 +45,13 @@ import com.saveme.app.ui.theme.ScreenTitleStyle
 import com.saveme.app.ui.theme.accentColor
 import com.saveme.app.ui.theme.collectionIcon
 
-/** Membuat koleksi baru atau menyunting yang sudah ada: nama, warna, ikon. */
+/**
+ * Membuat koleksi baru atau menyunting yang sudah ada: nama, warna, ikon.
+ *
+ * Isinya panjang — sepuluh warna dan enam belas ikon — jadi penggulirannya
+ * diserahkan ke [NeoDialog], yang tahu persis berapa tinggi layar yang tersisa
+ * setelah papan ketik muncul.
+ */
 @Composable
 fun CollectionEditorDialog(
     initial: CollectionEntity?,
@@ -58,7 +65,7 @@ fun CollectionEditorDialog(
     var iconKey by remember { mutableStateOf(initial?.iconKey ?: CollectionIconChoices.first().first) }
 
     NeoDialog(onDismissRequest = onDismiss) {
-        Column(Modifier.verticalScroll(rememberScrollState())) {
+        Column(Modifier.fillMaxWidth()) {
             Text(
                 text = when {
                     initial != null -> "Edit collection"
@@ -70,7 +77,13 @@ fun CollectionEditorDialog(
             )
             if (parentName != null && initial == null) {
                 Spacer(Modifier.height(3.dp))
-                Text("Inside $parentName", style = CaptionStyle, color = InkSoft)
+                Text(
+                    "Inside $parentName",
+                    style = CaptionStyle,
+                    color = InkSoft,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                )
             }
             Spacer(Modifier.height(16.dp))
 
@@ -87,6 +100,7 @@ fun CollectionEditorDialog(
             SectionLabel("Color")
             Spacer(Modifier.height(10.dp))
             FlowRow(
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
@@ -103,6 +117,7 @@ fun CollectionEditorDialog(
             SectionLabel("Icon")
             Spacer(Modifier.height(10.dp))
             FlowRow(
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
@@ -116,7 +131,10 @@ fun CollectionEditorDialog(
             }
 
             Spacer(Modifier.height(22.dp))
-            Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp),
+            ) {
                 NeoButton(
                     label = "Cancel",
                     onClick = onDismiss,
@@ -164,7 +182,8 @@ fun CollectionPickerDialog(
     excludeIds: Set<Long> = emptySet(),
     onCreateNew: (() -> Unit)? = null,
 ) {
-    NeoDialog(onDismissRequest = onDismiss) {
+    // Daftarnya punya penggulir sendiri supaya judul dan tombol tetap di tempat.
+    NeoDialog(onDismissRequest = onDismiss, scrollable = false) {
         CollectionPickerContent(title, collections, onDismiss, onPick, excludeIds, onCreateNew)
     }
 }
@@ -183,10 +202,12 @@ fun CollectionPickerSheet(
     excludeIds: Set<Long> = emptySet(),
 ) {
     NeoSurface(
-        modifier = modifier.fillMaxWidth(),
-        radius = 20.dp,
-        borderWidth = 3.dp,
-        shadowOffset = 6.dp,
+        modifier = modifier
+            .widthIn(max = 460.dp)
+            .fillMaxWidth(),
+        radius = NeoRadius.Card,
+        borderWidth = 4.dp,
+        shadowOffset = 8.dp,
         contentPadding = PaddingValues(20.dp),
     ) {
         CollectionPickerContent(title, collections, onDismiss, onPick, excludeIds, null)
@@ -204,33 +225,41 @@ private fun CollectionPickerContent(
 ) {
     val depths = remember(collections) { computeDepths(collections) }
 
-    Column {
+    Column(Modifier.fillMaxWidth()) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Text(title, style = ScreenTitleStyle, color = Ink, modifier = Modifier.weight(1f))
+            Text(
+                title,
+                style = ScreenTitleStyle,
+                color = Ink,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.weight(1f).padding(end = 8.dp),
+            )
             NeoIconButton(
                 icon = AppIcons.Close,
                 contentDescription = "Tutup",
                 onClick = onDismiss,
                 size = 38.dp,
                 iconSize = 17.dp,
-                radius = 11.dp,
             )
         }
         Spacer(Modifier.height(14.dp))
         Column(
             modifier = Modifier
-                .heightIn(max = 380.dp)
+                .heightIn(max = dialogListMaxHeight())
                 .verticalScroll(rememberScrollState()),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             collections.filter { it.id !in excludeIds }.forEach { collection ->
-                val depth = depths[collection.id] ?: 0
+                // Indentasinya dibatasi supaya subkoleksi yang dalam tidak
+                // menghimpit namanya sampai tak terbaca di layar sempit.
+                val depth = (depths[collection.id] ?: 0).coerceAtMost(4)
                 NeoSurface(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(start = (depth * 16).dp),
-                    radius = 12.dp,
-                    shadowOffset = 3.dp,
+                        .padding(start = (depth * 14).dp),
+                    radius = NeoRadius.Control,
+                    shadowOffset = 4.dp,
                     onClick = {
                         onPick(collection.id)
                         onDismiss()
@@ -246,9 +275,9 @@ private fun CollectionPickerContent(
                                 .size(34.dp)
                                 .background(
                                     accentColor(collection.colorKey),
-                                    RoundedCornerShape(9.dp),
+                                    RoundedCornerShape(NeoRadius.Chip),
                                 )
-                                .border(2.dp, Ink, RoundedCornerShape(9.dp)),
+                                .border(2.dp, Ink, RoundedCornerShape(NeoRadius.Chip)),
                         ) {
                             Icon(
                                 collectionIcon(collection.iconKey),

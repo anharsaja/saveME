@@ -37,7 +37,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.saveme.app.data.prefs.ThemeMode
-import com.saveme.app.ui.components.Mascot
+import com.saveme.app.ui.components.BrandMark
 import com.saveme.app.ui.components.NeoBanner
 import com.saveme.app.ui.components.NeoButton
 import com.saveme.app.ui.components.NeoChip
@@ -45,10 +45,13 @@ import com.saveme.app.ui.components.NeoConfirmDialog
 import com.saveme.app.ui.components.NeoIconButton
 import com.saveme.app.ui.components.NeoMenuDialog
 import com.saveme.app.ui.components.NeoMenuItem
+import com.saveme.app.ui.components.NeoRadius
 import com.saveme.app.ui.components.NeoSurface
 import com.saveme.app.ui.components.NeoSwitch
 import com.saveme.app.ui.components.SectionLabel
 import com.saveme.app.ui.components.SettingRow
+import com.saveme.app.ui.components.readableColumn
+import com.saveme.app.ui.components.screenGutter
 import com.saveme.app.ui.theme.AppIcons
 import com.saveme.app.ui.theme.BodyStyle
 import com.saveme.app.ui.theme.CaptionStyle
@@ -59,7 +62,7 @@ import com.saveme.app.ui.theme.DisplayStyle
 import com.saveme.app.ui.theme.Ink
 import com.saveme.app.ui.theme.InkSoft
 import com.saveme.app.ui.theme.Mint
-import com.saveme.app.ui.theme.Nunito
+import com.saveme.app.ui.theme.Archivo
 import com.saveme.app.ui.theme.OnAccent
 import com.saveme.app.ui.theme.ScreenTitleStyle
 import com.saveme.app.ui.theme.Sunny
@@ -105,9 +108,13 @@ fun SettingsScreen(
     Box(Modifier.fillMaxSize()) {
         Column(
             modifier = Modifier
+                // Di tablet isinya berhenti pada lebar yang masih enak dibaca
+                // lalu duduk di tengah, bukan melar mengikuti layar.
+                .align(Alignment.TopCenter)
+                .readableColumn()
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp),
+                .padding(horizontal = screenGutter()),
         ) {
             Spacer(Modifier.height(8.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -234,7 +241,7 @@ fun SettingsScreen(
             Spacer(Modifier.height(12.dp))
             NeoSurface(
                 modifier = Modifier.fillMaxWidth(),
-                radius = 14.dp,
+                radius = NeoRadius.Card,
                 contentPadding = PaddingValues(16.dp),
             ) {
                 Column {
@@ -310,9 +317,9 @@ private fun LibraryCard(
     NeoSurface(
         modifier = Modifier.fillMaxWidth(),
         background = Sunny,
-        radius = 20.dp,
-        borderWidth = 3.dp,
-        shadowOffset = 5.dp,
+        radius = NeoRadius.Card,
+        borderWidth = 4.dp,
+        shadowOffset = 8.dp,
         contentPadding = PaddingValues(18.dp),
     ) {
         Column(Modifier.fillMaxWidth()) {
@@ -324,13 +331,13 @@ private fun LibraryCard(
                     Spacer(Modifier.height(2.dp))
                     Text("Save smarter, every day.", style = BodyStyle, color = OnAccent.copy(alpha = 0.72f))
                 }
-                Mascot(size = 82.dp)
+                BrandMark(size = 82.dp)
             }
 
             Spacer(Modifier.height(16.dp))
             NeoSurface(
                 modifier = Modifier.fillMaxWidth(),
-                radius = 14.dp,
+                radius = NeoRadius.Card,
                 shadowOffset = 0.dp,
                 contentPadding = PaddingValues(15.dp),
             ) {
@@ -383,8 +390,8 @@ private fun CountRow(
         Box(
             Modifier
                 .size(34.dp)
-                .background(com.saveme.app.ui.theme.PaperDim, RoundedCornerShape(9.dp))
-                .border(2.dp, Ink.copy(alpha = 0.14f), RoundedCornerShape(9.dp)),
+                .background(com.saveme.app.ui.theme.PaperDim, RoundedCornerShape(NeoRadius.Chip))
+                .border(2.dp, Ink, RoundedCornerShape(NeoRadius.Chip)),
         ) {
             Icon(icon, null, tint = Ink, modifier = Modifier.align(Alignment.Center).size(17.dp))
         }
@@ -392,7 +399,7 @@ private fun CountRow(
         Text(label, style = CardTitleStyle, color = Ink, modifier = Modifier.weight(1f))
         Text(
             value.toString(),
-            fontFamily = Nunito,
+            fontFamily = Archivo,
             fontWeight = androidx.compose.ui.text.font.FontWeight.W800,
             fontSize = 18.sp,
             color = Ink,
@@ -418,7 +425,7 @@ private fun ReminderHourRow(hour: Int, onChange: (Int) -> Unit) {
                     onClick = { onChange((hour + 23) % 24) },
                     size = 34.dp,
                     iconSize = 15.dp,
-                    radius = 10.dp,
+                    radius = NeoRadius.Chip,
                     background = CardWhite,
                 )
                 NeoIconButton(
@@ -427,7 +434,7 @@ private fun ReminderHourRow(hour: Int, onChange: (Int) -> Unit) {
                     onClick = { onChange((hour + 1) % 24) },
                     size = 34.dp,
                     iconSize = 15.dp,
-                    radius = 10.dp,
+                    radius = NeoRadius.Chip,
                     background = CardWhite,
                 )
             }

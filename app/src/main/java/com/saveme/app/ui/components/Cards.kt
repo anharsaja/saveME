@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -36,6 +35,7 @@ import com.saveme.app.data.db.LinkWithTags
 import com.saveme.app.data.db.previewFile
 import com.saveme.app.ui.theme.AccentPalette
 import com.saveme.app.ui.theme.AppIcons
+import com.saveme.app.ui.theme.Archivo
 import com.saveme.app.ui.theme.CaptionStyle
 import com.saveme.app.ui.theme.CardTitleStyle
 import com.saveme.app.ui.theme.CardWhite
@@ -43,7 +43,6 @@ import com.saveme.app.ui.theme.Ink
 import com.saveme.app.ui.theme.InkFaint
 import com.saveme.app.ui.theme.InkSoft
 import com.saveme.app.ui.theme.Mint
-import com.saveme.app.ui.theme.Nunito
 import com.saveme.app.ui.theme.OnAccent
 import com.saveme.app.ui.theme.PaperDim
 import com.saveme.app.ui.theme.Sunny
@@ -65,16 +64,18 @@ fun CollectionCard(
 ) {
     val collection = summary.collection
     val accent = accentColor(collection.colorKey)
-    val tabShape = RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp)
+    val tabShape = RoundedCornerShape(topStart = NeoRadius.Chip, topEnd = NeoRadius.Chip)
 
     Column(modifier = modifier) {
+        // Lebar lidah map mengikuti lebar kartu, jadi bentuknya tetap sama
+        // entah petaknya dua kolom di ponsel atau lima kolom di tablet.
         Box(
             Modifier
                 .padding(start = 8.dp)
-                .width(92.dp)
+                .fillMaxWidth(0.44f)
                 .height(16.dp)
                 .background(accentTab(collection.colorKey), tabShape)
-                .border(2.5.dp, Ink, tabShape),
+                .border(NeoBorder, Ink, tabShape),
         )
         NeoSurface(
             // Tinggi dikunci agar petak kartu tetap rapi dan proporsinya sama
@@ -83,27 +84,27 @@ fun CollectionCard(
                 .fillMaxWidth()
                 .height(128.dp)
                 .offset(y = (-2).dp),
-            radius = 14.dp,
+            radius = NeoRadius.Card,
             onClick = onClick,
             onLongClick = onLongClick,
-            contentPadding = PaddingValues(13.dp),
+            contentPadding = PaddingValues(12.dp),
         ) {
             Column(Modifier.fillMaxSize()) {
                 Row(verticalAlignment = Alignment.Top) {
                     Box(
                         Modifier
-                            .size(46.dp)
-                            .background(accent, RoundedCornerShape(12.dp))
-                            .border(2.5.dp, Ink, RoundedCornerShape(12.dp)),
+                            .size(44.dp)
+                            .background(accent, RoundedCornerShape(NeoRadius.Control))
+                            .border(NeoBorder, Ink, RoundedCornerShape(NeoRadius.Control)),
                     ) {
                         Icon(
                             collectionIcon(collection.iconKey),
                             null,
                             tint = OnAccent,
-                            modifier = Modifier.align(Alignment.Center).size(22.dp),
+                            modifier = Modifier.align(Alignment.Center).size(21.dp),
                         )
                     }
-                    Spacer(Modifier.width(10.dp))
+                    Spacer(Modifier.width(9.dp))
                     Text(
                         text = buildString {
                             append(summary.linkCount)
@@ -112,7 +113,9 @@ fun CollectionCard(
                         },
                         style = CaptionStyle,
                         color = InkSoft,
-                        modifier = Modifier.padding(top = 3.dp),
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f).padding(top = 3.dp),
                     )
                 }
                 Spacer(Modifier.weight(1f))
@@ -145,11 +148,12 @@ fun LinkCard(
     selected: Boolean = false,
 ) {
     val link = item.link
+    val markShape = RoundedCornerShape(NeoRadius.Chip)
     NeoSurface(
         modifier = modifier,
-        radius = 14.dp,
+        radius = NeoRadius.Card,
         borderColor = if (selected) Sunny else Ink,
-        borderWidth = if (selected) 3.5.dp else 2.5.dp,
+        borderWidth = if (selected) 4.5.dp else NeoBorder,
         onClick = onClick,
         onLongClick = onLongClick,
     ) {
@@ -193,8 +197,8 @@ fun LinkCard(
                             .align(Alignment.TopEnd)
                             .padding(6.dp)
                             .size(26.dp)
-                            .background(Sunny, RoundedCornerShape(8.dp))
-                            .border(2.dp, Ink, RoundedCornerShape(8.dp)),
+                            .background(Sunny, markShape)
+                            .border(2.5.dp, Ink, markShape),
                     ) {
                         Icon(
                             AppIcons.Pin,
@@ -211,8 +215,8 @@ fun LinkCard(
                             .align(Alignment.TopStart)
                             .padding(6.dp)
                             .size(26.dp)
-                            .background(if (selected) Sunny else CardWhite, CircleShape)
-                            .border(2.5.dp, Ink, CircleShape),
+                            .background(if (selected) Sunny else CardWhite, markShape)
+                            .border(2.5.dp, Ink, markShape),
                     ) {
                         if (selected) {
                             Icon(
@@ -226,7 +230,7 @@ fun LinkCard(
                 }
             }
 
-            NeoDivider(thickness = 2.5.dp)
+            NeoDivider()
 
             Column(Modifier.padding(horizontal = 10.dp, vertical = 9.dp)) {
                 Text(
@@ -267,19 +271,20 @@ fun SourceBadge(url: String, modifier: Modifier = Modifier, size: Int = 18) {
     val host = UrlUtil.host(url)
     val color = AccentPalette[(host.hashCode().let { if (it < 0) -it else it }) % AccentPalette.size].second
     val letter = host.firstOrNull()?.uppercaseChar() ?: '?'
+    val shape = RoundedCornerShape(2.dp)
     Box(
         modifier = modifier
             .size(size.dp)
-            .clip(RoundedCornerShape((size * 0.3f).dp))
+            .clip(shape)
             .background(color)
-            .border(1.6.dp, Ink, RoundedCornerShape((size * 0.3f).dp)),
+            .border(2.dp, Ink, shape),
         contentAlignment = Alignment.Center,
     ) {
         Text(
             letter.toString(),
-            fontFamily = Nunito,
-            fontWeight = FontWeight.W800,
-            fontSize = (size * 0.55f).sp,
+            fontFamily = Archivo,
+            fontWeight = FontWeight.W900,
+            fontSize = (size * 0.5f).sp,
             color = Ink,
         )
     }

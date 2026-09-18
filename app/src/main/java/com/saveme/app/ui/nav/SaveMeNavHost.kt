@@ -1,5 +1,6 @@
 package com.saveme.app.ui.nav
 
+import androidx.activity.BackEventCompat
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.background
@@ -64,6 +65,23 @@ fun SaveMeNavHost(
             exitTransition = { slideOutHorizontally(Motion.ScreenSlide) { -it } },
             popEnterTransition = { slideInHorizontally(Motion.ScreenSlide) { -it } },
             popExitTransition = { slideOutHorizontally(Motion.ScreenSlide) { it } },
+            // Tombol atau usapan "kembali" milik sistem tidak memakai transisi
+            // pop di atas: Navigation punya pasangan sendiri untuk itu, dan
+            // bawaannya adalah mengecil sambil memudar. Tanpa dua baris berikut,
+            // kembali lewat tombol ponsel terasa berbeda dari tombol di aplikasi.
+            //
+            // Gerakannya mengikuti tepi yang diusap, jadi halaman selalu
+            // menyingkir searah dengan jari.
+            predictivePopEnterTransition = { edge ->
+                slideInHorizontally(Motion.ScreenSlide) { full ->
+                    if (edge == BackEventCompat.EDGE_RIGHT) full else -full
+                }
+            },
+            predictivePopExitTransition = { edge ->
+                slideOutHorizontally(Motion.ScreenSlide) { full ->
+                    if (edge == BackEventCompat.EDGE_RIGHT) -full else full
+                }
+            },
         ) {
 
             composable(Routes.HOME) {

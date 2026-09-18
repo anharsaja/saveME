@@ -1,11 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Ikon status bar: harus siluet putih polos agar Android bisa mewarnainya. -->
+<!-- Ikon status bar: harus siluet putih polos agar Android bisa mewarnainya.
+     Bentuknya mata rantai yang sama dengan logo, disederhanakan jadi dua
+     goresan tanpa garis tepi. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="24dp"
     android:height="24dp"
     android:viewportWidth="24"
     android:viewportHeight="24">
-    <path
-        android:fillColor="#FFFFFFFF"
-        android:pathData="M6,3 L18,3 A1,1 0 0 1 19,4 L19,21 L12,15.6 L5,21 L5,4 A1,1 0 0 1 6,3 Z" />
+
+    <group
+        android:rotation="-45"
+        android:pivotX="10.02"
+        android:pivotY="13.98">
+        <path
+            android:fillColor="#00000000"
+            android:strokeColor="#FFFFFFFF"
+            android:strokeWidth="2.6"
+            android:pathData="M7.82,11.18 L12.22,11.18 A2.8,2.8 0 0 1 12.22,16.78 L7.82,16.78 A2.8,2.8 0 0 1 7.82,11.18 Z" />
+    </group>
+
+    <group
+        android:rotation="-45"
+        android:pivotX="13.98"
+        android:pivotY="10.02">
+        <path
+            android:fillColor="#00000000"
+            android:strokeColor="#FFFFFFFF"
+            android:strokeWidth="2.6"
+            android:pathData="M11.78,7.22 L16.18,7.22 A2.8,2.8 0 0 1 16.18,12.82 L11.78,12.82 A2.8,2.8 0 0 1 11.78,7.22 Z" />
+    </group>
 </vector>

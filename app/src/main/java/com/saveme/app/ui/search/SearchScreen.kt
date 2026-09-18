@@ -12,9 +12,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -26,7 +26,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -36,9 +38,15 @@ import com.saveme.app.ui.components.LinkCard
 import com.saveme.app.ui.components.NeoButton
 import com.saveme.app.ui.components.NeoChip
 import com.saveme.app.ui.components.NeoDivider
+import com.saveme.app.ui.components.NeoRadius
 import com.saveme.app.ui.components.NeoSurface
 import com.saveme.app.ui.components.NeoTextField
 import com.saveme.app.ui.components.SectionLabel
+import com.saveme.app.ui.components.cardGridCells
+import com.saveme.app.ui.components.cardGridSpacing
+import com.saveme.app.ui.components.gridContentPadding
+import com.saveme.app.ui.components.screenGutter
+import com.saveme.app.ui.components.windowWidth
 import com.saveme.app.ui.theme.AppIcons
 import com.saveme.app.ui.theme.BodyStyle
 import com.saveme.app.ui.theme.CaptionStyle
@@ -47,7 +55,7 @@ import com.saveme.app.ui.theme.Ink
 import com.saveme.app.ui.theme.InkFaint
 import com.saveme.app.ui.theme.InkSoft
 import com.saveme.app.ui.theme.Mint
-import com.saveme.app.ui.theme.Nunito
+import com.saveme.app.ui.theme.Archivo
 import com.saveme.app.ui.theme.OnAccent
 import com.saveme.app.ui.theme.Sunny
 import com.saveme.app.ui.theme.accentColor
@@ -78,7 +86,7 @@ fun SearchScreen(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 10.dp),
+                .padding(horizontal = screenGutter(), vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             NeoTextField(
@@ -99,13 +107,14 @@ fun SearchScreen(
                 height = 52.dp,
             )
         }
-        NeoDivider(thickness = 2.5.dp)
+        NeoDivider()
 
+        val spacing = cardGridSpacing()
         LazyVerticalGrid(
-            columns = GridCells.Fixed(2),
-            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 32.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+            columns = cardGridCells(),
+            contentPadding = gridContentPadding(top = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(spacing),
+            verticalArrangement = Arrangement.spacedBy(spacing),
             modifier = Modifier.fillMaxSize(),
         ) {
             if (browsing) {
@@ -242,29 +251,43 @@ fun SearchScreen(
     }
 }
 
-/** Kartu kuning berisi empat angka ringkasan isi pustaka. */
+/**
+ * Kartu kuning berisi empat angka ringkasan isi pustaka.
+ *
+ * Empat kolom berjajar hanya muat mulai dari ponsel berukuran sedang; di layar
+ * yang lebih sempit angkanya dipecah jadi dua baris berisi dua, supaya kata
+ * "Collections" tidak pernah terpotong di tengah.
+ */
 @Composable
 private fun LibraryCard(collections: Int, links: Int, pinned: Int, tags: Int) {
+    val stats = listOf(
+        Triple(AppIcons.Folder, collections, "Collections"),
+        Triple(AppIcons.Link, links, "Links"),
+        Triple(AppIcons.Pin, pinned, "Pinned"),
+        Triple(AppIcons.Tag, tags, "Tags"),
+    )
+    val perRow = if (windowWidth() < 380.dp) 2 else 4
+
     NeoSurface(
         modifier = Modifier.fillMaxWidth(),
         background = Sunny,
-        radius = 18.dp,
+        radius = NeoRadius.Card,
         contentPadding = PaddingValues(horizontal = 16.dp, vertical = 15.dp),
     ) {
         Column(Modifier.fillMaxWidth()) {
             SectionLabel("Your library", color = OnAccent)
             Spacer(Modifier.height(14.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                StatColumn(AppIcons.Folder, collections, "Collections", Modifier.weight(1f))
-                StatDivider()
-                StatColumn(AppIcons.Link, links, "Links", Modifier.weight(1f))
-                StatDivider()
-                StatColumn(AppIcons.Pin, pinned, "Pinned", Modifier.weight(1f))
-                StatDivider()
-                StatColumn(AppIcons.Tag, tags, "Tags", Modifier.weight(1f))
+            stats.chunked(perRow).forEachIndexed { index, row ->
+                if (index > 0) Spacer(Modifier.height(14.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    row.forEachIndexed { position, (icon, value, label) ->
+                        if (position > 0) StatDivider()
+                        StatColumn(icon, value, label, Modifier.weight(1f))
+                    }
+                }
             }
         }
     }
@@ -273,26 +296,34 @@ private fun LibraryCard(collections: Int, links: Int, pinned: Int, tags: Int) {
 @Composable
 private fun StatColumn(icon: ImageVector, value: Int, label: String, modifier: Modifier = Modifier) {
     Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally) {
-        Icon(icon, null, tint = OnAccent, modifier = Modifier.width(24.dp).height(24.dp))
+        Icon(icon, null, tint = OnAccent, modifier = Modifier.size(22.dp))
         Spacer(Modifier.height(7.dp))
         Text(
             value.toString(),
-            fontFamily = Nunito,
-            fontWeight = androidx.compose.ui.text.font.FontWeight.W800,
+            fontFamily = Archivo,
+            fontWeight = FontWeight.W900,
             fontSize = 27.sp,
+            letterSpacing = (-1).sp,
             color = OnAccent,
         )
         Spacer(Modifier.height(2.dp))
-        Text(label, style = CaptionStyle, color = OnAccent.copy(alpha = 0.72f))
+        Text(
+            label,
+            style = CaptionStyle,
+            color = OnAccent.copy(alpha = 0.72f),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
     }
 }
 
+/** Pemisah pejal antar angka — garis tinta, bukan bayangan lembut. */
 @Composable
 private fun StatDivider() {
     Box(
         Modifier
-            .width(1.6.dp)
-            .height(56.dp)
-            .background(OnAccent.copy(alpha = 0.22f)),
+            .width(2.dp)
+            .height(52.dp)
+            .background(OnAccent.copy(alpha = 0.3f)),
     )
 }

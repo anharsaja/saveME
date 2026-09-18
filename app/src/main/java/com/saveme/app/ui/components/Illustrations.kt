@@ -7,106 +7,100 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Fill
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.saveme.app.ui.theme.CardWhite
-import com.saveme.app.ui.theme.Coral
 import com.saveme.app.ui.theme.Ink
 import com.saveme.app.ui.theme.PaperDim
 import com.saveme.app.ui.theme.Sky
 import com.saveme.app.ui.theme.Sunny
 
 /**
- * Maskot aplikasi: sebuah penanda kertas kuning bermata dua dengan penjepit
- * kertas merah. Digambar dengan Canvas, bukan aset gambar, supaya tajam di
- * segala ukuran layar.
+ * Lambang aplikasi: dua mata rantai saling mengait, satu biru langit dan satu
+ * kuning, bergaris hitam tebal dengan kilau kecil di dua sudut — sama seperti
+ * berkas di folder `logo/`. Digambar dengan Canvas, bukan aset gambar, supaya
+ * tajam di segala ukuran layar dan ikut berganti bersama tema.
  */
 @Composable
-fun Mascot(
+fun BrandMark(
     modifier: Modifier = Modifier,
     size: Dp = 96.dp,
-    cheering: Boolean = true,
 ) {
     // Warna dibaca di sini karena isi Canvas bukan lagi ruang komposisi.
     val ink = Ink
-    val body = Sunny
-    val sheet = Sky
-    val clip = Coral
-    val highlight = CardWhite
+    val upper = Sky
+    val lower = Sunny
 
     Canvas(modifier = modifier.size(size)) {
         val s = this.size.minDimension / 100f
-        fun p(x: Float, y: Float) = Offset(x * s, y * s)
-        val lineWidth = 4.2f * s
 
-        // Kaki
-        drawLine(ink, p(40f, 76f), p(35f, 91f), lineWidth, StrokeCap.Round)
-        drawLine(ink, p(60f, 76f), p(65f, 91f), lineWidth, StrokeCap.Round)
-        drawLine(ink, p(29f, 92f), p(39f, 92f), lineWidth, StrokeCap.Round)
-        drawLine(ink, p(61f, 92f), p(71f, 92f), lineWidth, StrokeCap.Round)
+        // Mata rantai bawah digambar lebih dulu supaya yang atas menimpanya
+        // di titik silang, persis seperti rantai sungguhan.
+        chainLink(center = Offset(40f * s, 60f * s), unit = s, tint = lower, ink = ink)
+        chainLink(center = Offset(60f * s, 40f * s), unit = s, tint = upper, ink = ink)
 
-        // Lengan, terangkat saat sedang bersorak
-        val leftHand = if (cheering) p(9f, 34f) else p(11f, 56f)
-        val rightHand = if (cheering) p(91f, 34f) else p(89f, 56f)
-        drawLine(ink, p(24f, 52f), leftHand, lineWidth, StrokeCap.Round)
-        drawLine(ink, p(76f, 52f), rightHand, lineWidth, StrokeCap.Round)
-        drawCircle(ink, 5.2f * s, leftHand)
-        drawCircle(ink, 5.2f * s, rightHand)
-
-        // Lembar biru yang mengintip di belakang badan
-        drawRoundRect(
-            color = sheet,
-            topLeft = p(31f, 26f),
-            size = Size(48f * s, 54f * s),
-            cornerRadius = CornerRadius(11f * s, 11f * s),
-            style = Fill,
-        )
-        drawRoundRect(
-            color = ink,
-            topLeft = p(31f, 26f),
-            size = Size(48f * s, 54f * s),
-            cornerRadius = CornerRadius(11f * s, 11f * s),
-            style = Stroke(width = 4f * s),
-        )
-
-        // Badan kuning
-        drawRoundRect(
-            color = body,
-            topLeft = p(24f, 20f),
-            size = Size(50f * s, 56f * s),
-            cornerRadius = CornerRadius(11f * s, 11f * s),
-            style = Fill,
-        )
-        drawRoundRect(
-            color = ink,
-            topLeft = p(24f, 20f),
-            size = Size(50f * s, 56f * s),
-            cornerRadius = CornerRadius(11f * s, 11f * s),
-            style = Stroke(width = 4f * s),
-        )
-
-        // Wajah
-        drawCircle(ink, 3.6f * s, p(39f, 42f))
-        drawCircle(ink, 3.6f * s, p(59f, 42f))
-        val smile = Path().apply {
-            moveTo(40f * s, 54f * s)
-            quadraticTo(49f * s, 64f * s, 58f * s, 54f * s)
+        // Kilau: tiga goresan di kiri atas, tiga lagi memantul di kanan bawah.
+        val sparkle = 4.2f * s
+        fun spark(x1: Float, y1: Float, x2: Float, y2: Float) {
+            drawLine(
+                color = ink,
+                start = Offset(x1 * s, y1 * s),
+                end = Offset(x2 * s, y2 * s),
+                strokeWidth = sparkle,
+                cap = StrokeCap.Round,
+            )
         }
-        drawPath(smile, ink, style = Stroke(width = 3.6f * s, cap = StrokeCap.Round))
-
-        // Penjepit kertas di pojok kiri atas
-        drawCircle(ink, 10f * s, p(26f, 15f), style = Stroke(width = 7.5f * s))
-        drawCircle(clip, 10f * s, p(26f, 15f), style = Stroke(width = 4.2f * s))
-        drawCircle(ink, 4.6f * s, p(26f, 15f), style = Stroke(width = 3f * s))
-        drawCircle(highlight, 3.2f * s, p(26f, 15f))
+        spark(34f, 6f, 34f, 19f)
+        spark(16f, 16f, 25f, 25f)
+        spark(7f, 34f, 20f, 34f)
+        spark(66f, 81f, 66f, 94f)
+        spark(75f, 75f, 84f, 84f)
+        spark(80f, 66f, 93f, 66f)
     }
 }
 
-/** Ilustrasi map kosong untuk layar koleksi yang belum berisi link. */
+/**
+ * Satu mata rantai: kapsul berlubang miring 45 derajat, digambar sebagai garis
+ * tebal berwarna yang diapit dua garis hitam. Cara ini menyisakan lubang di
+ * tengah tanpa perlu tahu warna apa yang ada di belakangnya.
+ */
+private fun DrawScope.chainLink(center: Offset, unit: Float, tint: Color, ink: Color) {
+    val length = 44f * unit
+    val thickness = 26f * unit
+    val band = 8f * unit
+    val outline = 2.8f * unit
+
+    rotate(degrees = -45f, pivot = center) {
+        val topLeft = Offset(center.x - length / 2f, center.y - thickness / 2f)
+        val boxSize = Size(length, thickness)
+        val radius = CornerRadius(thickness / 2f, thickness / 2f)
+
+        drawRoundRect(
+            color = ink,
+            topLeft = topLeft,
+            size = boxSize,
+            cornerRadius = radius,
+            style = Stroke(width = band + outline * 2f),
+        )
+        drawRoundRect(
+            color = tint,
+            topLeft = topLeft,
+            size = boxSize,
+            cornerRadius = radius,
+            style = Stroke(width = band),
+        )
+    }
+}
+
+/**
+ * Ilustrasi map kosong untuk layar koleksi yang belum berisi link. Bergaris
+ * tebal dengan bayangan pejal, satu bahasa dengan kartu di sekitarnya.
+ */
 @Composable
 fun EmptyFolderArt(modifier: Modifier = Modifier, size: Dp = 120.dp) {
     val fill = PaperDim
@@ -115,28 +109,32 @@ fun EmptyFolderArt(modifier: Modifier = Modifier, size: Dp = 120.dp) {
     Canvas(modifier = modifier.size(size)) {
         val s = this.size.minDimension / 100f
         fun p(x: Float, y: Float) = Offset(x * s, y * s)
+        val corner = CornerRadius(4f * s, 4f * s)
+        val line = 3.4f * s
 
-        // Bayangan lembut di bawah map
-        drawOval(
-            color = ink.copy(alpha = 0.10f),
-            topLeft = p(20f, 78f),
-            size = Size(60f * s, 10f * s),
+        // Bayangan pejal, digeser ke kanan bawah seperti permukaan lain.
+        drawRoundRect(
+            color = ink,
+            topLeft = p(22f, 33f),
+            size = Size(68f * s, 52f * s),
+            cornerRadius = corner,
+            style = Fill,
         )
 
         // Lidah map di belakang
         drawRoundRect(
             color = fill,
-            topLeft = p(20f, 20f),
+            topLeft = p(16f, 19f),
             size = Size(34f * s, 16f * s),
-            cornerRadius = CornerRadius(5f * s, 5f * s),
+            cornerRadius = corner,
             style = Fill,
         )
         drawRoundRect(
-            color = ink.copy(alpha = 0.32f),
-            topLeft = p(20f, 20f),
+            color = ink,
+            topLeft = p(16f, 19f),
             size = Size(34f * s, 16f * s),
-            cornerRadius = CornerRadius(5f * s, 5f * s),
-            style = Stroke(width = 2.6f * s),
+            cornerRadius = corner,
+            style = Stroke(width = line),
         )
 
         // Badan map
@@ -144,15 +142,15 @@ fun EmptyFolderArt(modifier: Modifier = Modifier, size: Dp = 120.dp) {
             color = fill,
             topLeft = p(16f, 28f),
             size = Size(68f * s, 52f * s),
-            cornerRadius = CornerRadius(8f * s, 8f * s),
+            cornerRadius = corner,
             style = Fill,
         )
         drawRoundRect(
-            color = ink.copy(alpha = 0.32f),
+            color = ink,
             topLeft = p(16f, 28f),
             size = Size(68f * s, 52f * s),
-            cornerRadius = CornerRadius(8f * s, 8f * s),
-            style = Stroke(width = 2.6f * s),
+            cornerRadius = corner,
+            style = Stroke(width = line),
         )
     }
 }

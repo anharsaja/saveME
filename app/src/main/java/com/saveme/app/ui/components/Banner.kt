@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -58,10 +59,10 @@ fun BoxScope.NeoBanner(
     ) {
         NeoSurface(
             background = Mint,
-            radius = 14.dp,
+            radius = NeoRadius.Card,
             onClick = onDismiss,
             contentPadding = PaddingValues(horizontal = 15.dp, vertical = 13.dp),
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.widthIn(max = 460.dp).fillMaxWidth(),
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(icon, null, tint = Ink, modifier = Modifier.size(20.dp))

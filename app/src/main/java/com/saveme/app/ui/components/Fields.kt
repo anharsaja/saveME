@@ -6,6 +6,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -16,7 +17,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
@@ -36,14 +36,17 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.saveme.app.ui.theme.BodyStyle
+import com.saveme.app.ui.theme.CaptionStyle
+import com.saveme.app.ui.theme.CardTitleStyle
 import com.saveme.app.ui.theme.CardWhite
 import com.saveme.app.ui.theme.Ink
-import com.saveme.app.ui.theme.Motion
 import com.saveme.app.ui.theme.InkFaint
+import com.saveme.app.ui.theme.InkSoft
 import com.saveme.app.ui.theme.Mint
+import com.saveme.app.ui.theme.Motion
 import com.saveme.app.ui.theme.PaperDim
 
-/** Kolom teks satu gaya dengan permukaan lain: kotak putih bergaris tebal. */
+/** Kolom teks satu gaya dengan permukaan lain: kotak bergaris tebal. */
 @Composable
 fun NeoTextField(
     value: String,
@@ -54,7 +57,7 @@ fun NeoTextField(
     trailing: @Composable (() -> Unit)? = null,
     singleLine: Boolean = true,
     minHeight: Dp = 56.dp,
-    radius: Dp = 14.dp,
+    radius: Dp = NeoRadius.Control,
     background: Color = CardWhite,
     textStyle: TextStyle = BodyStyle,
     keyboardType: KeyboardType = KeyboardType.Text,
@@ -109,7 +112,10 @@ fun NeoTextField(
     }
 }
 
-/** Sakelar dua posisi bergaya sama: rel bergaris hitam, kenop putih tebal. */
+/**
+ * Sakelar dua posisi bergaya sama: rel persegi bergaris hitam, kenop kotak
+ * yang menggeser dari tepi ke tepi. Tidak ada bentuk kapsul di mana pun.
+ */
 @Composable
 fun NeoSwitch(
     checked: Boolean,
@@ -118,31 +124,32 @@ fun NeoSwitch(
     onColor: Color = Mint,
     offColor: Color = PaperDim,
 ) {
+    val shape = RoundedCornerShape(NeoRadius.Chip)
     val trackColor by animateColorAsState(
         targetValue = if (checked) onColor else offColor,
         animationSpec = Motion.QuickColor,
         label = "switchTrack",
     )
     val thumbOffset by animateDpAsState(
-        targetValue = if (checked) 24.dp else 2.dp,
-        animationSpec = Motion.PressDp,
+        targetValue = if (checked) 25.dp else 3.dp,
+        animationSpec = Motion.QuickDp,
         label = "switchThumb",
     )
 
     Box(
         modifier = modifier
-            .size(width = 52.dp, height = 30.dp)
-            .background(trackColor, RoundedCornerShape(15.dp))
-            .border(2.5.dp, Ink, RoundedCornerShape(15.dp))
+            .size(width = 54.dp, height = 32.dp)
+            .background(trackColor, shape)
+            .border(3.dp, Ink, shape)
             .neoClickable { onCheckedChange(!checked) },
     ) {
         Box(
             Modifier
                 .align(Alignment.CenterStart)
                 .offset(x = thumbOffset)
-                .size(24.dp)
-                .background(CardWhite, CircleShape)
-                .border(2.5.dp, Ink, CircleShape),
+                .size(23.dp)
+                .background(CardWhite, shape)
+                .border(3.dp, Ink, shape),
         )
     }
 }
@@ -163,7 +170,7 @@ fun SettingRow(
 ) {
     NeoSurface(
         modifier = modifier.fillMaxWidth(),
-        radius = 14.dp,
+        radius = NeoRadius.Card,
         onClick = onClick,
         contentPadding = PaddingValues(14.dp),
     ) {
@@ -175,8 +182,8 @@ fun SettingRow(
             Box(
                 Modifier
                     .size(42.dp)
-                    .background(iconBackground, RoundedCornerShape(11.dp))
-                    .border(2.dp, Ink.copy(alpha = 0.14f), RoundedCornerShape(11.dp)),
+                    .background(iconBackground, RoundedCornerShape(NeoRadius.Chip))
+                    .border(2.dp, Ink, RoundedCornerShape(NeoRadius.Chip)),
             ) {
                 Icon(
                     icon,
@@ -185,17 +192,11 @@ fun SettingRow(
                     modifier = Modifier.align(Alignment.Center).size(21.dp),
                 )
             }
-            Box(Modifier.weight(1f)) {
-                androidx.compose.foundation.layout.Column {
-                    Text(title, style = com.saveme.app.ui.theme.CardTitleStyle, color = Ink)
-                    if (subtitle != null) {
-                        Spacer(Modifier.height(2.dp))
-                        Text(
-                            subtitle,
-                            style = com.saveme.app.ui.theme.CaptionStyle,
-                            color = com.saveme.app.ui.theme.InkSoft,
-                        )
-                    }
+            Column(Modifier.weight(1f)) {
+                Text(title, style = CardTitleStyle, color = Ink)
+                if (subtitle != null) {
+                    Spacer(Modifier.height(2.dp))
+                    Text(subtitle, style = CaptionStyle, color = InkSoft)
                 }
             }
             trailing?.invoke()

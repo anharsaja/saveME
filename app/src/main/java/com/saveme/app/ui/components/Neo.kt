@@ -4,7 +4,6 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -33,13 +32,13 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.saveme.app.ui.theme.ButtonStyle
 import com.saveme.app.ui.theme.CaptionStyle
 import com.saveme.app.ui.theme.CardWhite
 import com.saveme.app.ui.theme.Ink
-import com.saveme.app.ui.theme.InkSoft
 import com.saveme.app.ui.theme.Motion
 import com.saveme.app.ui.theme.OverlineStyle
 import com.saveme.app.ui.theme.Paper
@@ -48,10 +47,26 @@ import com.saveme.app.ui.theme.readableOn
 import com.saveme.app.ui.theme.softTint
 
 /** Ketebalan garis tepi standar di seluruh aplikasi. */
-val NeoBorder = 2.5.dp
+val NeoBorder = 3.dp
 
 /** Jarak bayangan solid di kanan-bawah setiap permukaan. */
-val NeoShadow = 4.dp
+val NeoShadow = 6.dp
+
+/**
+ * Sudut di gaya neo-brutalism nyaris siku: bentuk kotak yang jujur, tanpa
+ * pembulatan yang melembutkan. Sisa lengkungan sekecil ini hanya supaya sudut
+ * tidak tampak kasar di layar rapat.
+ */
+object NeoRadius {
+    /** Keping kecil: tag, lencana, titik warna. */
+    val Chip = 3.dp
+
+    /** Kendali: tombol, kolom teks, baris daftar. */
+    val Control = 4.dp
+
+    /** Kartu, dialog, dan permukaan besar lainnya. */
+    val Card = 6.dp
+}
 
 /**
  * Permukaan dasar: kotak berisi konten dengan garis hitam tebal dan bayangan
@@ -62,7 +77,7 @@ val NeoShadow = 4.dp
 fun NeoSurface(
     modifier: Modifier = Modifier,
     background: Color = CardWhite,
-    radius: Dp = 16.dp,
+    radius: Dp = NeoRadius.Card,
     borderWidth: Dp = NeoBorder,
     borderColor: Color = Ink,
     shadowOffset: Dp = NeoShadow,
@@ -75,10 +90,12 @@ fun NeoSurface(
 ) {
     val shape: Shape = RoundedCornerShape(radius)
     val interaction = remember { MutableInteractionSource() }
-    val pressed by interaction.collectIsPressedAsState()
+    val held by rememberHeldPress(interaction)
+    val down = held && onClick != null && enabled
     val press by animateDpAsState(
-        targetValue = if (pressed && onClick != null && enabled) shadowOffset else 0.dp,
-        animationSpec = Motion.PressDp,
+        targetValue = if (down) shadowOffset else 0.dp,
+        // Turun cepat, naik memantul sedikit. Lihat catatan di Motion.
+        animationSpec = if (down) Motion.PressInDp else Motion.PressOutDp,
         label = "neoPress",
     )
 
@@ -131,7 +148,7 @@ fun NeoIconButton(
     iconSize: Dp = 20.dp,
     background: Color = CardWhite,
     tint: Color = readableOn(background),
-    radius: Dp = 14.dp,
+    radius: Dp = NeoRadius.Control,
     enabled: Boolean = true,
 ) {
     NeoSurface(
@@ -150,7 +167,12 @@ fun NeoIconButton(
     }
 }
 
-/** Tombol utama dengan label, opsional ikon di kiri atau kanan. */
+/**
+ * Tombol utama dengan label, opsional ikon di kiri atau kanan.
+ *
+ * Labelnya ditulis kapital semua: di gaya ini tombol adalah papan nama, bukan
+ * kalimat. Label yang tidak muat dipangkas sebaris alih-alih melebarkan tombol.
+ */
 @Composable
 fun NeoButton(
     label: String,
@@ -162,8 +184,9 @@ fun NeoButton(
     trailingIcon: ImageVector? = null,
     enabled: Boolean = true,
     height: Dp = 54.dp,
-    radius: Dp = 14.dp,
+    radius: Dp = NeoRadius.Control,
     textStyle: TextStyle = ButtonStyle,
+    uppercase: Boolean = true,
 ) {
     NeoSurface(
         modifier = modifier.height(height + NeoShadow),
@@ -175,43 +198,60 @@ fun NeoButton(
         Row(
             modifier = Modifier
                 .align(Alignment.Center)
-                .padding(horizontal = 18.dp),
+                .padding(horizontal = 14.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center,
         ) {
             if (leadingIcon != null) {
-                Icon(leadingIcon, null, tint = contentColor, modifier = Modifier.size(20.dp))
-                Spacer(Modifier.width(10.dp))
+                Icon(leadingIcon, null, tint = contentColor, modifier = Modifier.size(19.dp))
+                Spacer(Modifier.width(9.dp))
             }
-            Text(label, style = textStyle, color = contentColor)
+            Text(
+                text = if (uppercase) label.uppercase() else label,
+                style = textStyle,
+                color = contentColor,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
             if (trailingIcon != null) {
-                Spacer(Modifier.width(10.dp))
-                Icon(trailingIcon, null, tint = contentColor, modifier = Modifier.size(20.dp))
+                Spacer(Modifier.width(9.dp))
+                Icon(trailingIcon, null, tint = contentColor, modifier = Modifier.size(19.dp))
             }
         }
     }
 }
 
-/** Label kapital kecil pemisah seksi. */
+/**
+ * Label kapital kecil pemisah seksi, didahului balok tinta pejal — penanda
+ * khas gaya ini, menggantikan garis tipis yang biasa dipakai.
+ */
 @Composable
 fun SectionLabel(
     text: String,
     modifier: Modifier = Modifier,
-    color: Color = InkSoft,
+    color: Color = Ink,
     icon: ImageVector? = null,
 ) {
     Row(modifier = modifier, verticalAlignment = Alignment.CenterVertically) {
         if (icon != null) {
             Icon(icon, null, tint = color, modifier = Modifier.size(16.dp))
-            Spacer(Modifier.width(7.dp))
+        } else {
+            Box(Modifier.size(10.dp).background(color))
         }
-        Text(text.uppercase(), style = OverlineStyle, color = color)
+        Spacer(Modifier.width(8.dp))
+        Text(
+            text.uppercase(),
+            style = OverlineStyle,
+            color = color,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+        )
     }
 }
 
 /** Garis pemisah tebal, sewarna tinta. */
 @Composable
-fun NeoDivider(modifier: Modifier = Modifier, thickness: Dp = 2.dp, color: Color = Ink) {
+fun NeoDivider(modifier: Modifier = Modifier, thickness: Dp = NeoBorder, color: Color = Ink) {
     Box(
         modifier
             .fillMaxWidth()
@@ -235,9 +275,9 @@ fun NeoChip(
     NeoSurface(
         modifier = modifier,
         background = background,
-        radius = 9.dp,
+        radius = NeoRadius.Chip,
         borderWidth = 2.dp,
-        shadowOffset = 2.dp,
+        shadowOffset = 3.dp,
         onClick = onClick,
         contentPadding = PaddingValues(horizontal = 9.dp, vertical = 5.dp),
     ) {
@@ -246,7 +286,13 @@ fun NeoChip(
                 Icon(leadingIcon, null, tint = contentColor, modifier = Modifier.size(13.dp))
                 Spacer(Modifier.width(5.dp))
             }
-            Text(label, style = CaptionStyle, color = contentColor)
+            Text(
+                label,
+                style = CaptionStyle,
+                color = contentColor,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
             if (trailingIcon != null) {
                 Spacer(Modifier.width(5.dp))
                 Icon(

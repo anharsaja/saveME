@@ -11,91 +11,97 @@ import androidx.compose.ui.unit.sp
 import com.saveme.app.R
 
 /**
- * Nunito dipakai sebagai satu-satunya family. File-nya variable font, jadi tiap bobot
- * diminta lewat sumbu `wght` alih-alih menyertakan satu file per bobot.
+ * Archivo dipakai sebagai satu-satunya family: grotesk bersudut tegak dengan
+ * bobot sampai 900 — huruf khas neo-brutalism, jauh dari kesan bulat dan lembut.
+ * File-nya variable font, jadi tiap bobot diminta lewat sumbu `wght` alih-alih
+ * menyertakan satu file per bobot.
  */
-private fun nunito(weight: Int) = Font(
-    resId = R.font.nunito,
+private fun archivo(weight: Int) = Font(
+    resId = R.font.archivo,
     weight = FontWeight(weight),
     variationSettings = FontVariation.Settings(FontVariation.weight(weight)),
 )
 
-val Nunito = FontFamily(
-    nunito(400),
-    nunito(500),
-    nunito(600),
-    nunito(700),
-    nunito(800),
-    nunito(900),
+val Archivo = FontFamily(
+    archivo(400),
+    archivo(500),
+    archivo(600),
+    archivo(700),
+    archivo(800),
+    archivo(900),
 )
 
-/** Judul besar dua baris di layar Home. */
+/**
+ * Judul besar dua baris di layar Home. Bobot paling tebal dengan jarak huruf
+ * dirapatkan sampai nyaris bersentuhan — blok teks yang pekat, bukan kalimat.
+ */
 val DisplayStyle = TextStyle(
-    fontFamily = Nunito,
-    fontWeight = FontWeight.W800,
+    fontFamily = Archivo,
+    fontWeight = FontWeight.W900,
     fontSize = 34.sp,
-    lineHeight = 39.sp,
-    letterSpacing = (-0.8).sp,
+    lineHeight = 37.sp,
+    letterSpacing = (-1.4).sp,
 )
 
 /** Judul di top bar layar dalam. */
 val ScreenTitleStyle = TextStyle(
-    fontFamily = Nunito,
+    fontFamily = Archivo,
     fontWeight = FontWeight.W800,
     fontSize = 21.sp,
     lineHeight = 25.sp,
-    letterSpacing = (-0.3).sp,
+    letterSpacing = (-0.6).sp,
 )
 
 /** "My Collections" dan judul seksi besar lainnya. */
 val SectionTitleStyle = TextStyle(
-    fontFamily = Nunito,
-    fontWeight = FontWeight.W800,
+    fontFamily = Archivo,
+    fontWeight = FontWeight.W900,
     fontSize = 19.sp,
     lineHeight = 24.sp,
-    letterSpacing = (-0.3).sp,
+    letterSpacing = (-0.5).sp,
 )
 
 /** Label kapital kecil: ALL LINKS (4), PREFERENCES, NOTES, ... */
 val OverlineStyle = TextStyle(
-    fontFamily = Nunito,
+    fontFamily = Archivo,
     fontWeight = FontWeight.W900,
-    fontSize = 13.sp,
-    lineHeight = 17.sp,
-    letterSpacing = 0.9.sp,
+    fontSize = 12.sp,
+    lineHeight = 16.sp,
+    letterSpacing = 1.4.sp,
 )
 
 /** Judul kartu link / nama koleksi. */
 val CardTitleStyle = TextStyle(
-    fontFamily = Nunito,
-    fontWeight = FontWeight.W800,
+    fontFamily = Archivo,
+    fontWeight = FontWeight.W700,
     fontSize = 15.sp,
     lineHeight = 20.sp,
-    letterSpacing = (-0.1).sp,
+    letterSpacing = (-0.2).sp,
 )
 
 val BodyStyle = TextStyle(
-    fontFamily = Nunito,
-    fontWeight = FontWeight.W700,
+    fontFamily = Archivo,
+    fontWeight = FontWeight.W500,
     fontSize = 15.sp,
-    lineHeight = 22.sp,
+    lineHeight = 21.sp,
+    letterSpacing = (-0.1).sp,
 )
 
 val CaptionStyle = TextStyle(
-    fontFamily = Nunito,
-    fontWeight = FontWeight.W700,
+    fontFamily = Archivo,
+    fontWeight = FontWeight.W600,
     fontSize = 13.sp,
-    lineHeight = 18.sp,
+    lineHeight = 17.sp,
 )
 
-/** Teks di dalam tombol utama. */
+/** Teks di dalam tombol utama — selalu tampil kapital, lihat NeoButton. */
 val ButtonStyle = TextStyle(
-    fontFamily = Nunito,
+    fontFamily = Archivo,
     fontWeight = FontWeight.W800,
-    fontSize = 16.sp,
-    lineHeight = 20.sp,
+    fontSize = 15.sp,
+    lineHeight = 19.sp,
     textAlign = TextAlign.Center,
-    letterSpacing = (-0.2).sp,
+    letterSpacing = 0.6.sp,
 )
 
 val SaveMeTypography = Typography(

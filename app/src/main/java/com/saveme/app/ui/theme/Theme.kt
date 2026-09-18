@@ -9,12 +9,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.unit.dp
 
+// Sudut nyaris siku di semua ukuran — ciri paling kentara gaya neo-brutalism.
 private val SaveMeShapes = Shapes(
-    extraSmall = RoundedCornerShape(8.dp),
-    small = RoundedCornerShape(12.dp),
-    medium = RoundedCornerShape(16.dp),
-    large = RoundedCornerShape(20.dp),
-    extraLarge = RoundedCornerShape(26.dp),
+    extraSmall = RoundedCornerShape(3.dp),
+    small = RoundedCornerShape(4.dp),
+    medium = RoundedCornerShape(5.dp),
+    large = RoundedCornerShape(6.dp),
+    extraLarge = RoundedCornerShape(8.dp),
 )
 
 @Composable

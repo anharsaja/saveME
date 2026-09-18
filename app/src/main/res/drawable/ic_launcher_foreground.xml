@@ -1,17 +1,48 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Penanda hitam di dalam zona aman 72dp dari kanvas ikon adaptif 108dp. -->
+<!-- Dua mata rantai saling mengait, sama dengan berkas di folder logo/.
+     Tiap mata digambar sebagai kapsul bergaris: satu goresan hitam tebal lalu
+     satu goresan berwarna yang lebih tipis di atasnya, sehingga lubang di
+     tengahnya tetap tembus tanpa perlu jalur terpisah.
+
+     Seluruhnya duduk di dalam lingkaran aman 66dp dari kanvas ikon adaptif
+     108dp, jadi tidak terpotong oleh topeng bulat maupun kotak. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <path
-        android:fillColor="#111111"
-        android:pathData="M38,30 L70,30 A4,4 0 0 1 74,34 L74,80 L54,65 L34,80 L34,34 A4,4 0 0 1 38,30 Z" />
-    <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M47,45 m-4,0 a4,4 0 1,0 8,0 a4,4 0 1,0 -8,0" />
-    <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M63,45 m-4,0 a4,4 0 1,0 8,0 a4,4 0 1,0 -8,0" />
+
+    <!-- Mata rantai kuning di bawah, digambar lebih dulu. -->
+    <group
+        android:rotation="-45"
+        android:pivotX="47.3"
+        android:pivotY="60.7">
+        <path
+            android:fillColor="#00000000"
+            android:strokeColor="#000000"
+            android:strokeWidth="10.2"
+            android:pathData="M39.8,51.2 L54.8,51.2 A9.5,9.5 0 0 1 54.8,70.2 L39.8,70.2 A9.5,9.5 0 0 1 39.8,51.2 Z" />
+        <path
+            android:fillColor="#00000000"
+            android:strokeColor="#FFD93D"
+            android:strokeWidth="5.8"
+            android:pathData="M39.8,51.2 L54.8,51.2 A9.5,9.5 0 0 1 54.8,70.2 L39.8,70.2 A9.5,9.5 0 0 1 39.8,51.2 Z" />
+    </group>
+
+    <!-- Mata rantai biru di atas, menimpa titik silangnya. -->
+    <group
+        android:rotation="-45"
+        android:pivotX="60.7"
+        android:pivotY="47.3">
+        <path
+            android:fillColor="#00000000"
+            android:strokeColor="#000000"
+            android:strokeWidth="10.2"
+            android:pathData="M53.2,37.8 L68.2,37.8 A9.5,9.5 0 0 1 68.2,56.8 L53.2,56.8 A9.5,9.5 0 0 1 53.2,37.8 Z" />
+        <path
+            android:fillColor="#00000000"
+            android:strokeColor="#7FD4FF"
+            android:strokeWidth="5.8"
+            android:pathData="M53.2,37.8 L68.2,37.8 A9.5,9.5 0 0 1 68.2,56.8 L53.2,56.8 A9.5,9.5 0 0 1 53.2,37.8 Z" />
+    </group>
 </vector>
